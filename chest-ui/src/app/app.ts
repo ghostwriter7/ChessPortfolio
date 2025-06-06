@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import { Component, OnInit } from "@angular/core";
 import { io } from 'socket.io-client';
 
 @Component({
@@ -9,7 +9,10 @@ import { io } from 'socket.io-client';
 export class App implements OnInit {
 
   public ngOnInit(): void {
-    const socket = io();
+    const socket = io('http://localhost:3000', {
+      transports: ['websocket'],
+      withCredentials: true
+    });
 
     socket.on('connect', () => {
       console.log('Connected');
