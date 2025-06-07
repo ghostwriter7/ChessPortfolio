@@ -2,6 +2,7 @@ import { Component, computed, OnInit, signal } from "@angular/core";
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { io, Socket } from 'socket.io-client';
 import { ChessBoard } from './components/chess-board/chess-board';
+import { Color } from './components/types/color';
 
 @Component({
   selector: 'app-root',
@@ -15,6 +16,7 @@ import { ChessBoard } from './components/chess-board/chess-board';
 export class App implements OnInit {
   protected isAnonymous = computed(() => !this.loggedAs());
   protected loggedAs = signal('');
+  protected opponent = signal('');
   protected usernameControl = new FormControl('', Validators.required);
 
   private socket!: Socket;
@@ -32,6 +34,10 @@ export class App implements OnInit {
     this.socket.on('disconnect', () => {
       console.log('Disconnected');
     });
+
+    this.socket.on('gameStarted', (data: { color: Color, opponent: string }) => {
+      this.opponent.set(data.opponent);
+    })
   }
 
   protected joinGame(): void {

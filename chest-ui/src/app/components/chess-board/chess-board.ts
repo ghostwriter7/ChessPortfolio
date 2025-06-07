@@ -1,12 +1,11 @@
 import { NgClass } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
+import { Color } from '../types/color';
 
 type Row = {
   cells: Cell[];
   index: number;
 }
-
-type Color = 'white' | 'black';
 
 type Cell = {
   color: Color;

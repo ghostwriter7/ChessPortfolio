@@ -9,7 +9,7 @@
   align-self: center;
   background: cornflowerblue;
   display: inline-flex;
-  height: 100px;
+  height: 90px;
   justify-content: center;
   padding-inline: 1rem;
   align-items: center;
@@ -32,9 +32,9 @@
   align-items: center;
   border: 1px solid black;
   display: flex;
-  height: 100px;
+  height: 90px;
   justify-content: center;
-  width: 100px;
+  width: 90px;
   text-transform: uppercase;
 
   &.white {

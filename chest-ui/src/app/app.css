@@ -5,6 +5,18 @@
   justify-content: center;
 }
 
+header {
+  background: cornflowerblue;
+  border-radius: 4px;
+  margin-block: 0.5rem;
+  padding: 1rem;
+  text-align: center;
+
+  h1, p {
+    margin: 0;
+  }
+}
+
 .login {
   padding-block: 1rem;
 }
