@@ -51,7 +51,7 @@ export class ChessBoard implements OnInit {
           };
         })
       }
-    }) as Row[];
+    }).reverse() as Row[];
 
     this.rows.set(rows);
   }

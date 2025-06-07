@@ -1,8 +1,31 @@
 .grid {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  grid-template-rows: repeat(8, 1fr);
+  grid-template-columns: auto repeat(8, 1fr);
+  grid-template-rows: repeat(9, 1fr);
   width: fit-content;
+}
+
+.row-number {
+  align-self: center;
+  background: cornflowerblue;
+  display: inline-flex;
+  height: 100px;
+  justify-content: center;
+  padding-inline: 1rem;
+  align-items: center;
+}
+
+.column-labels {
+  background: cornflowerblue;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-column: 2 / span 8;
+  height: fit-content;
+  justify-items: center;
+
+  .column-letter {
+    padding: 1rem;
+  }
 }
 
 .cell {
