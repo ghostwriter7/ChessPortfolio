@@ -1,33 +1,54 @@
-import { Component, OnInit } from "@angular/core";
-import { io } from 'socket.io-client';
+import { Component, computed, OnInit, signal } from "@angular/core";
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { io, Socket } from 'socket.io-client';
 import { ChessBoard } from './components/chess-board/chess-board';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
   imports: [
-    ChessBoard
+    ChessBoard,
+    ReactiveFormsModule
   ],
   styleUrl: './app.css'
 })
 export class App implements OnInit {
+  protected isAnonymous = computed(() => !this.loggedAs());
+  protected loggedAs = signal('');
+  protected usernameControl = new FormControl('', Validators.required);
+
+  private socket!: Socket;
 
   public ngOnInit(): void {
-    const socket = io('http://localhost:3000', {
+    this.socket = io('http://localhost:3000', {
       transports: ['websocket'],
       withCredentials: true
     });
 
-    socket.on('connect', () => {
+    this.socket.on('connect', () => {
       console.log('Connected');
     });
 
-    socket.on('disconnect', () => {
+    this.socket.on('disconnect', () => {
       console.log('Disconnected');
     });
+  }
 
-    socket.on('waiting', (callback) => {
+  protected joinGame(): void {
+    this.usernameControl.disable();
+    const username = this.usernameControl.value;
 
-    })
+    if (!username) return;
+
+    this.socket
+      .timeout(5000)
+      .emit('joinGame', username, (err: unknown, response: unknown) => {
+        if (err) {
+          alert(err);
+          this.usernameControl.enable();
+        } else {
+          this.loggedAs.set(username);
+        }
+      });
   }
 }

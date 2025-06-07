@@ -1,1 +1,10 @@
-<app-chess-board />
+@if (isAnonymous()) {
+  <div class="login">
+    <input placeholder="Type your username..." type="text" [formControl]="usernameControl"/>
+    <button [disabled]="usernameControl.invalid" (click)="joinGame()">Join</button>
+  </div>
+} @else {
+  <h1>Welcome {{ loggedAs() }}</h1>
+}
+
+<app-chess-board/>
