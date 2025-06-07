@@ -14,3 +14,9 @@
 </header>
 
 <app-chess-board/>
+
+@if (isPlaying()) {
+  <footer>
+    <button (click)="leaveGame()">Leave</button>
+  </footer>
+}

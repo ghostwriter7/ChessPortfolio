@@ -25,6 +25,11 @@ const socketToGameId = new Map<string, string>();
 io.on('connection', (socket) => {
     console.log('New connection');
 
+    socket.on('leaveGame', () => {
+        leaveGame(socket);
+        socket.disconnect();
+    });
+
     socket.on('joinGame', (username, callback) => {
         console.log(username);
         socket.data.username = username;
@@ -68,17 +73,7 @@ io.on('connection', (socket) => {
         const gameId = socketToGameId.get(socket.id);
 
         if (gameId && games.has(gameId)) {
-            const game = games.get(gameId)!;
-            const opponent = game.white.id === socket.id ? game.black : game.white;
-
-            opponent.emit('gameEnded', `${socket.data.username} disconnected from the game ${gameId}`);
-            opponent.leave(gameId);
-
-            socketToGameId.delete(socket.id);
-            socketToGameId.delete(opponent.id);
-            games.delete(gameId);
-
-            console.log(`Game ended: ${gameId}`);
+            leaveGame(socket);
         } else {
             const index = waitingPlayers.findIndex(({ id }) => id === socket.id);
             if (index !== -1) {
@@ -91,3 +86,19 @@ io.on('connection', (socket) => {
 server.listen(PORT, () => {
     console.log('Server is running on port 3000');
 });
+
+function leaveGame(socket: Socket) {
+    const gameId = socketToGameId.get(socket.id)!;
+
+    const game = games.get(gameId)!;
+    const opponent = game.white.id === socket.id ? game.black : game.white;
+
+    opponent.emit('gameEnded', `${socket.data.username} disconnected from the game`);
+    opponent.leave(gameId);
+
+    socketToGameId.delete(socket.id);
+    socketToGameId.delete(opponent.id);
+    games.delete(gameId);
+
+    console.log(`Game ended: ${gameId}`);
+}

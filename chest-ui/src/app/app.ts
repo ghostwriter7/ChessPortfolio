@@ -15,6 +15,7 @@ import { Color } from './components/types/color';
 })
 export class App implements OnInit {
   protected isAnonymous = computed(() => !this.loggedAs());
+  protected isPlaying = signal(false);
   protected loggedAs = signal('');
   protected opponent = signal('');
   protected usernameControl = new FormControl('', Validators.required);
@@ -37,7 +38,14 @@ export class App implements OnInit {
 
     this.socket.on('gameStarted', (data: { color: Color, opponent: string }) => {
       this.opponent.set(data.opponent);
-    })
+      this.isPlaying.set(true);
+    });
+
+    this.socket.on('gameEnded', (data: string) => {
+      this.isPlaying.set(false);
+      this.opponent.set('');
+      alert(data);
+    });
   }
 
   protected joinGame(): void {
@@ -56,5 +64,11 @@ export class App implements OnInit {
           this.loggedAs.set(username);
         }
       });
+  }
+
+  protected leaveGame(): void {
+    this.socket.emit('leaveGame');
+    this.isPlaying.set(false);
+    this.opponent.set('');
   }
 }
