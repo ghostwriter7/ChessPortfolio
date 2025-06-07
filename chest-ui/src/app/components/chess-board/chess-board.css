@@ -1,0 +1,41 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  width: fit-content;
+}
+
+.cell {
+  align-items: center;
+  border: 1px solid black;
+  display: flex;
+  height: 100px;
+  justify-content: center;
+  width: 100px;
+  text-transform: uppercase;
+
+  &.white {
+    background-color: lightgray;
+  }
+
+  &.black {
+    background-color: black;
+  }
+}
+
+.figure {
+  border-radius: 4px;
+  padding: 0.25rem;
+
+  &.white {
+    background: #eeeeee;
+    border: 1px solid black;
+    color: black;
+  }
+
+  &.black {
+    background: #333333;
+    border: 1px solid lightgray;
+    color: white;
+  }
+}

@@ -1,0 +1,11 @@
+<div class="grid">
+  @for (row of rows(); track $index) {
+    @for (cell of row.cells; track $index) {
+      <div class="cell" [ngClass]="cell.color">
+        @if (cell.occupiedBy) {
+          <span class="figure" [ngClass]="cell.occupiedBy.color">{{ cell.occupiedBy.name }}</span>
+        }
+      </div>
+    }
+  }
+</div>
