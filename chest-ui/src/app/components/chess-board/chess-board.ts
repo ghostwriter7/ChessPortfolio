@@ -1,6 +1,6 @@
 import { NgClass } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
-import { Color } from '../types/color';
+import { Color } from '@app/types/color';
 
 type Row = {
   cells: Cell[];

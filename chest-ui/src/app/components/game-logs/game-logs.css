@@ -1,0 +1,14 @@
+:host {
+  background: cornflowerblue;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.25rem;
+}
+
+ul {
+  li {
+    list-style: none;
+  }
+}

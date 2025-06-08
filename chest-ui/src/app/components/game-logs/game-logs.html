@@ -1,0 +1,6 @@
+<h3>Game Logs</h3>
+<ul class="logs">
+  @for (log of logs(); track $index) {
+    <li>{{ log.message }} | {{ log.timestamp | date : 'HH:mm:ss' }}</li>
+  }
+</ul>

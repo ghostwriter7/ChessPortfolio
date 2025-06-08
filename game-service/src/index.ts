@@ -87,7 +87,7 @@ server.listen(PORT, () => {
     console.log('Server is running on port 3000');
 });
 
-function leaveGame(socket: Socket) {
+function leaveGame(socket: Socket): void {
     const gameId = socketToGameId.get(socket.id)!;
 
     const game = games.get(gameId)!;

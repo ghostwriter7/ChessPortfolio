@@ -2,14 +2,18 @@ import { Component, computed, OnInit, signal } from "@angular/core";
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { io, Socket } from 'socket.io-client';
 import { ChessBoard } from './components/chess-board/chess-board';
-import { Color } from './components/types/color';
+import { GameLogs } from './components/game-logs/game-logs';
+import { Log } from './models/log';
+import { GameLogger } from './services/game-logger';
+import { Color } from './types/color';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
   imports: [
     ChessBoard,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    GameLogs
   ],
   styleUrl: './app.css'
 })
@@ -21,6 +25,9 @@ export class App implements OnInit {
   protected usernameControl = new FormControl('', Validators.required);
 
   private socket!: Socket;
+
+  constructor(private readonly gameLogger: GameLogger) {
+  }
 
   public ngOnInit(): void {
     this.socket = io('http://localhost:3000', {
@@ -36,12 +43,14 @@ export class App implements OnInit {
       console.log('Disconnected');
     });
 
-    this.socket.on('gameStarted', (data: { color: Color, opponent: string }) => {
-      this.opponent.set(data.opponent);
+    this.socket.on('gameStarted', ({ color, opponent }: { color: Color, opponent: string }) => {
+      this.gameLogger.log(Log.of(`You're playing ${color} against ${opponent}`));
+      this.opponent.set(opponent);
       this.isPlaying.set(true);
     });
 
     this.socket.on('gameEnded', (data: string) => {
+      this.gameLogger.log(Log.of(data));
       this.isPlaying.set(false);
       this.opponent.set('');
       alert(data);
@@ -56,11 +65,12 @@ export class App implements OnInit {
 
     this.socket
       .timeout(5000)
-      .emit('joinGame', username, (err: unknown, response: unknown) => {
+      .emit('joinGame', username, (err: unknown, response: string) => {
         if (err) {
           alert(err);
           this.usernameControl.enable();
         } else {
+          this.gameLogger.log(Log.of(response));
           this.loggedAs.set(username);
         }
       });
