@@ -3,6 +3,13 @@
   grid-template-columns: auto repeat(8, 1fr);
   grid-template-rows: repeat(8, 1fr) auto;
   width: fit-content;
+  pointer-events: none;
+  opacity: 0.5;
+
+  &.active {
+    opacity: 1;
+    pointer-events: all;
+  }
 }
 
 .row-number {
@@ -36,6 +43,14 @@
   justify-content: center;
   width: 90px;
   text-transform: uppercase;
+
+  &.selectable {
+    cursor: pointer;
+
+    &:hover {
+      background-color: lightseagreen;
+    }
+  }
 
   &.white {
     background-color: lightgray;

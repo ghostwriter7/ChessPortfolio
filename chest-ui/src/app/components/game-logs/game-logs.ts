@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Signal } from '@angular/core';
 import { Log } from '@app/models/log';
-import { GameLogger } from '@app/services/game-logger';
+import { GameLogger } from '@app/services/game-logger/game-logger';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,

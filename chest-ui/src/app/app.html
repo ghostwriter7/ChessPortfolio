@@ -13,11 +13,11 @@
   }
 </header>
 
-<app-chess-board [playerColor]="playerColor()"/>
+<app-chess-board/>
 
 <app-game-logs/>
 
-@if (isPlaying()) {
+@if (gameStarted()) {
   <footer>
     <button (click)="leaveGame()">Leave</button>
   </footer>
