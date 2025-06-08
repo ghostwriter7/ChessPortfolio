@@ -1,6 +1,7 @@
-import { Component, computed, OnInit, signal } from "@angular/core";
+import { Component, computed, OnInit, Signal, signal } from "@angular/core";
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { GameStateStore } from '@app/services/game-state-store/game-state-store';
+import { Player } from '@app/types/player';
 import { io, Socket } from 'socket.io-client';
 import { ChessBoard } from './components/chess-board/chess-board';
 import { GameLogs } from './components/game-logs/game-logs';
@@ -20,9 +21,9 @@ import { Color } from './types/color';
 })
 export class App implements OnInit {
   protected readonly gameStarted = signal(false);
-  protected readonly isAnonymous = computed(() => !this.loggedAs());
-  protected readonly loggedAs = signal('');
-  protected readonly opponent = signal('');
+  protected readonly isAnonymous = computed(() => !this.gameStateStore.$player());
+  protected readonly player: Signal<Player | null>;
+  protected readonly opponentName = computed(() => this.gameStateStore.$opponent()?.name);
   protected readonly usernameControl = new FormControl('', Validators.required);
 
   private socket!: Socket;
@@ -30,6 +31,7 @@ export class App implements OnInit {
   constructor(
     private readonly gameStateStore: GameStateStore,
     private readonly gameLogger: GameLogger) {
+    this.player = this.gameStateStore.$player;
   }
 
   public ngOnInit(): void {
@@ -48,7 +50,7 @@ export class App implements OnInit {
 
     this.socket.on('gameStarted', ({ color, opponent }: { color: Color, opponent: string; }) => {
       this.gameLogger.log(Log.of(`You're playing ${color} against ${opponent}`));
-      this.gameStateStore.setPlayer(this.loggedAs(), color);
+      this.gameStateStore.setPlayerColor(color);
       this.gameStateStore.setOpponent(opponent, color === 'white' ? 'black' : 'white');
       if (color === 'white') this.gameStateStore.setPlayerTurn();
       this.gameStarted.set(true);
@@ -57,7 +59,6 @@ export class App implements OnInit {
     this.socket.on('gameEnded', (data: string) => {
       this.gameLogger.log(Log.of(data));
       this.gameStarted.set(false);
-      this.opponent.set('');
       alert(data);
     });
   }
@@ -76,7 +77,7 @@ export class App implements OnInit {
           this.usernameControl.enable();
         } else {
           this.gameLogger.log(Log.of(response));
-          this.loggedAs.set(username);
+          this.gameStateStore.setPlayerName(username);
         }
       });
   }
@@ -84,6 +85,5 @@ export class App implements OnInit {
   protected leaveGame(): void {
     this.socket.emit('leaveGame');
     this.gameStarted.set(false);
-    this.opponent.set('');
   }
 }

@@ -2,14 +2,12 @@ import { computed, Injectable, signal } from '@angular/core';
 import { EmptyBoard } from '@app/consts/empty-board';
 import { Color } from '@app/types/color';
 import { FigureName } from '@app/types/figure-name';
+import { Player } from '@app/types/player';
 import { Letter, Position, RowNumber } from '@app/types/position';
 import { Row } from '@app/types/row';
 
 type State = {
-  player: {
-    name: string;
-    color: Color;
-  } | null;
+  player: Player | null;
   opponent: {
     name: string;
     color: Color;
@@ -61,8 +59,12 @@ export class GameStateStore {
 
   private readonly state = signal<State>({ player: null, opponent: null, isPlayerTurn: false, board: EmptyBoard });
 
-  public setPlayer(name: string, color: Color): void {
-    this.state.update((state) => ({ ...state, player: { name, color } }));
+  public setPlayerName(name: string): void {
+    this.state.update((state) => ({ ...state, player: { ...state.player, name } }));
+  }
+
+  public setPlayerColor(color: Color): void {
+    this.state.update((state) => ({ ...state, player: { ...state.player!, color } }));
   }
 
   public setOpponent(name: string, color: Color): void {

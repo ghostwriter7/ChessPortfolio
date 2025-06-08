@@ -5,11 +5,11 @@
       <button [disabled]="usernameControl.invalid" (click)="joinGame()">Join</button>
     </div>
   } @else {
-    <h1>Welcome {{ loggedAs() }}</h1>
+    <h1>Welcome {{ player()?.name }}</h1>
   }
 
-  @if (opponent(); as opponent) {
-    <p>You're playing against {{ opponent }}</p>
+  @if (opponentName(); as opponentName) {
+    <p>You're playing against {{ opponentName }}</p>
   }
 </header>
 
