@@ -17,11 +17,8 @@ export class ChessBoard {
   protected playerColor = computed(() => this.gameStateStore.$player()?.color);
 
   protected readonly board: Signal<Row[]>;
-  protected readonly letters = computed(() => {
-    const letters = new Array(8).fill(null).map((_, index) => String.fromCharCode(index + 65));
-    const color = this.playerColor();
-    return !color || color === 'white' ? letters : letters.reverse();
-  });
+  protected readonly letters =
+    new Array(8).fill(null).map((_, index) => String.fromCharCode(index + 65));
 
   constructor(private readonly gameStateStore: GameStateStore) {
     this.board = this.gameStateStore.$board;
