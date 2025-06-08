@@ -22,6 +22,7 @@ export class App implements OnInit {
   protected isPlaying = signal(false);
   protected loggedAs = signal('');
   protected opponent = signal('');
+  protected playerColor = signal<Color>('white');
   protected usernameControl = new FormControl('', Validators.required);
 
   private socket!: Socket;
@@ -45,6 +46,7 @@ export class App implements OnInit {
 
     this.socket.on('gameStarted', ({ color, opponent }: { color: Color, opponent: string }) => {
       this.gameLogger.log(Log.of(`You're playing ${color} against ${opponent}`));
+      this.playerColor.set(color);
       this.opponent.set(opponent);
       this.isPlaying.set(true);
     });

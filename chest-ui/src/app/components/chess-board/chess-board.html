@@ -1,5 +1,5 @@
 <div class="grid">
-  @for (row of rows(); track $index) {
+  @for (row of chessBoard(); track $index) {
     <span class="row-number">{{ row.index }}</span>
     @for (cell of row.cells; track $index) {
       <div class="cell" [ngClass]="cell.color">
@@ -11,13 +11,8 @@
   }
 
   <div class="column-labels">
-    <span class="column-letter">A</span>
-    <span class="column-letter">B</span>
-    <span class="column-letter">C</span>
-    <span class="column-letter">D</span>
-    <span class="column-letter">E</span>
-    <span class="column-letter">F</span>
-    <span class="column-letter">G</span>
-    <span class="column-letter">H</span>
+    @for (letter of letters(); track letter) {
+      <span class="column-letter">{{ letter }}</span>
+    }
   </div>
 </div>

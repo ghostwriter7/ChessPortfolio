@@ -1,5 +1,5 @@
 import { NgClass } from '@angular/common';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, computed, input, OnInit, signal } from '@angular/core';
 import { Color } from '@app/types/color';
 
 type Row = {
@@ -30,7 +30,21 @@ type Figure = {
   styleUrl: './chess-board.css'
 })
 export class ChessBoard implements OnInit {
-  public rows = signal<Row[]>([]);
+  public playerColor = input<Color>('white');
+  protected readonly rows = signal<Row[]>([]);
+  protected readonly chessBoard = computed(() => {
+    const playerColor = this.playerColor();
+    const rows = this.rows();
+
+    if (playerColor === 'white') return rows;
+
+    return rows.map((row) => ({ ...row, cells: row.cells.reverse() })).reverse();
+  })
+  protected readonly letters = computed(() => {
+    const letters = new Array(8).fill(null).map((_, index) => String.fromCharCode(index + 65));
+    return this.playerColor() === 'white' ? letters : letters.reverse();
+  });
+
 
   public ngOnInit(): void {
     const rows = new Array(8).fill(null).map((_, index) => {
