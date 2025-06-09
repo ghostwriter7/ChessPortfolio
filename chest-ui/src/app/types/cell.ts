@@ -1,5 +1,4 @@
-import { Color } from "@app/types/color";
-import { Figure } from '@app/types/figure';
+import { Color, Figure } from '@chess-logic';
 
 export type Cell = {
   color: Color;

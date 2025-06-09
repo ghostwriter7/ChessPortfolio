@@ -1,5 +1,5 @@
-import { Figure } from '@app/types/figure';
-import { Position } from '@app/types/position';
+import { Figure } from '../types/figure';
+import { Position } from '../types/position';
 
 export const EmptyBoard: Record<Position, Figure | null> = {
   a1: { name: 'rook', color: 'white' },

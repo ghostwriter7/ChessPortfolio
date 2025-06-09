@@ -1,9 +1,6 @@
 import { computed, Injectable, signal } from '@angular/core';
-import { EmptyBoard } from '@app/consts/empty-board';
-import { Color } from '@app/types/color';
-import { FigureName } from '@app/types/figure-name';
 import { Player } from '@app/types/player';
-import { Letter, Position, RowNumber } from '@app/types/position';
+import { Color, EmptyBoard, FigureName, Letter, Position, RowNumber } from '@chess-logic';
 import { Row } from '@app/types/row';
 
 type State = {

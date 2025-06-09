@@ -7,7 +7,7 @@ import { ChessBoard } from './components/chess-board/chess-board';
 import { GameLogs } from './components/game-logs/game-logs';
 import { Log } from './models/log';
 import { GameLogger } from './services/game-logger/game-logger';
-import { Color } from './types/color';
+import { Color } from '@chess-logic';
 
 @Component({
   selector: 'app-root',
