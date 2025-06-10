@@ -1,1 +1,3 @@
-export type PieceName = 'pawn' | 'knight' | 'bishop' | 'rook' | 'queen' | 'king';
+export type PieceName = 'pawn' | 'knight' | 'king' | SlidingPieceName;
+
+export type SlidingPieceName = 'queen' | 'rook' | 'bishop';

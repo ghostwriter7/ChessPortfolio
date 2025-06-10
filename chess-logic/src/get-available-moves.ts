@@ -1,10 +1,8 @@
 import { Board } from "./types/board";
-import { PieceName } from "./types/piece-name";
+import { PieceName, SlidingPieceName } from "./types/piece-name";
 import { Letter, Position } from "./types/position";
 
-type SlidingPiece = 'queen' | 'rook' | 'bishop';
-
-const isSlidingPiece = (name: PieceName): name is SlidingPiece => ['queen', 'rook', 'bishop'].includes(name);
+const isSlidingPiece = (name: PieceName): name is SlidingPieceName => ['queen', 'rook', 'bishop'].includes(name);
 
 const letters: Letter[] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
@@ -42,7 +40,7 @@ const getTopSibling = (position: Position): Position | null => getSibling(positi
 const getBottomSibling = (position: Position): Position | null => getSibling(position, sameColumn, bottomRow);
 
 
-const directions: Record<SlidingPiece, ((position: Position) => Position | null)[]> = {
+const directions: Record<SlidingPieceName, ((position: Position) => Position | null)[]> = {
     bishop: [getLeftTopSibling, getLeftBottomSibling, getRightBottomSibling, getRightTopSibling],
     rook: [getLeftSibling, getBottomSibling, getRightSibling, getTopSibling],
     queen: [
@@ -69,7 +67,7 @@ const walkBoard = (board: Board, position: Position, nextPositionFn: (position: 
     walkBoard(board, nextPositionFn(position), nextPositionFn, path);
 }
 
-const getAvailablePositions = (board: Board, name: SlidingPiece, position: Position): Position[] => {
+const getAvailablePositions = (board: Board, name: SlidingPieceName, position: Position): Position[] => {
     const availablePositions: Position[] = [];
 
     directions[name].forEach((directionFn) => {
