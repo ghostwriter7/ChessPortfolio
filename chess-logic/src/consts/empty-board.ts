@@ -1,7 +1,6 @@
-import { Figure } from '../types/figure';
-import { Position } from '../types/position';
+import { Board } from "../types/board";
 
-export const EmptyBoard: Record<Position, Figure | null> = {
+export const EmptyBoard: Board = {
   a1: { name: 'rook', color: 'white' },
   b1: { name: 'knight', color: 'white' },
   c1: { name: 'bishop', color: 'white' },
