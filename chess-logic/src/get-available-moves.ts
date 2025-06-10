@@ -6,6 +6,17 @@ const isSlidingPiece = (name: PieceName): name is SlidingPieceName => ['queen', 
 
 const letters: Letter[] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
+const knightOffsets = [
+    [-2, 1],
+    [-1, 2],
+    [1, 2],
+    [2, 1],
+    [1, -2],
+    [2, -1],
+    [-1, -2],
+    [-2, -1]
+];
+
 const isValidRowIndex = (index: number): boolean => index >= 1 && index <= 8;
 
 const getSibling = (position: Position, columnOffset: number, rowOffset: number): Position | null => {
@@ -99,5 +110,11 @@ export function getAvailableMoves(board: Board, selectedPosition: Position): Pos
 
     if (isSlidingPiece(name)) {
         return getAvailablePositions(board, name, selectedPosition);
+    }
+
+    if (name === 'knight') {
+        return knightOffsets
+            .map(([columnOffset, rowOffset]) => getSibling(selectedPosition, columnOffset, rowOffset))
+            .filter(Boolean);
     }
 }
