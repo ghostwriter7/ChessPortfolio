@@ -1,6 +1,6 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { Player } from '@app/types/player';
-import { Color, EmptyBoard, FigureName, Letter, Position, RowNumber } from '@chess-logic';
+import { Color, EmptyBoard, PieceName, Letter, Position, RowNumber } from '@chess-logic';
 import { Row } from '@app/types/row';
 
 type State = {
@@ -12,7 +12,7 @@ type State = {
   isPlayerTurn: boolean;
   board: {
     [position in Position]: {
-    name: FigureName;
+    name: PieceName;
     color: Color;
   } | null;
   }

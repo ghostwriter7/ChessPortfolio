@@ -1,8 +1,8 @@
-import { Color, Figure } from '@chess-logic';
+import { Color, Piece } from '@chess-logic';
 
 export type Cell = {
   color: Color;
-  occupiedBy: Figure | null;
+  occupiedBy: Piece | null;
   index: number;
   position: string;
 }

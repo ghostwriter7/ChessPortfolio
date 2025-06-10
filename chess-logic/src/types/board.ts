@@ -1,4 +1,4 @@
-import { Figure } from "./figure";
+import { Piece } from "./piece";
 import { Position } from "./position";
 
-export type Board = Record<Position, Figure | null>;
+export type Board = Record<Position, Piece | null>;

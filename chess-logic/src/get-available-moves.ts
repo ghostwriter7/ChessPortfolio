@@ -1,6 +1,10 @@
 import { Board } from "./types/board";
-import { FigureName } from "./types/figure-name";
+import { PieceName } from "./types/piece-name";
 import { Letter, Position } from "./types/position";
+
+type SlidingPiece = 'queen' | 'rook' | 'bishop';
+
+const isSlidingPiece = (name: PieceName): name is SlidingPiece => ['queen', 'rook', 'bishop'].includes(name);
 
 const letters: Letter[] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
@@ -37,9 +41,20 @@ const getRightSibling = (position: Position): Position | null => getSibling(posi
 const getTopSibling = (position: Position): Position | null => getSibling(position, sameColumn, topRow);
 const getBottomSibling = (position: Position): Position | null => getSibling(position, sameColumn, bottomRow);
 
-const directions: Partial<Record<FigureName, ((position: Position) => Position | null)[]>> = {
+
+const directions: Record<SlidingPiece, ((position: Position) => Position | null)[]> = {
     bishop: [getLeftTopSibling, getLeftBottomSibling, getRightBottomSibling, getRightTopSibling],
-    rook: [getLeftSibling, getBottomSibling, getRightSibling, getTopSibling]
+    rook: [getLeftSibling, getBottomSibling, getRightSibling, getTopSibling],
+    queen: [
+        getLeftTopSibling,
+        getLeftSibling,
+        getLeftBottomSibling,
+        getBottomSibling,
+        getRightBottomSibling,
+        getRightSibling,
+        getRightTopSibling,
+        getTopSibling
+    ]
 }
 
 const walkBoard = (board: Board, position: Position, nextPositionFn: (position: Position) => Position, path: Position[]): void => {
@@ -54,22 +69,22 @@ const walkBoard = (board: Board, position: Position, nextPositionFn: (position: 
     walkBoard(board, nextPositionFn(position), nextPositionFn, path);
 }
 
-const getAvailablePositions = (board: Board, name: FigureName, position: Position): Position[] => {
+const getAvailablePositions = (board: Board, name: SlidingPiece, position: Position): Position[] => {
     const availablePositions: Position[] = [];
 
     directions[name].forEach((directionFn) => {
-       walkBoard(board, directionFn(position), directionFn, availablePositions);
+        walkBoard(board, directionFn(position), directionFn, availablePositions);
     });
 
     return availablePositions;
 }
 
 export function getAvailableMoves(board: Board, selectedPosition: Position): Position[] {
-    const figure = board[selectedPosition];
+    const piece = board[selectedPosition];
 
-    if (!figure) return [];
+    if (!piece) return [];
 
-    const { color, name } = figure;
+    const { color, name } = piece;
     const isWhite = color === 'white';
     const rowIndex = parseInt(selectedPosition[1]);
     const columnId = selectedPosition[0] as Letter;
@@ -84,11 +99,7 @@ export function getAvailableMoves(board: Board, selectedPosition: Position): Pos
             `${letters[columnIndex]}${nextRowIndex}` as Position);
     }
 
-    if (name === 'rook') {
-        return getAvailablePositions(board, name, selectedPosition);
-    }
-
-    if (name === 'bishop') {
+    if (isSlidingPiece(name)) {
         return getAvailablePositions(board, name, selectedPosition);
     }
 }
