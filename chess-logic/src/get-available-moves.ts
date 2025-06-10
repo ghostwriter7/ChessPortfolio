@@ -1,6 +1,9 @@
 import { Board } from "./types/board";
+import { Color } from "./types/color";
 import { PieceName, SlidingPieceName } from "./types/piece-name";
 import { Letter, Position } from "./types/position";
+
+type GetSiblingFn = (position: Position) => Position | null;
 
 const isSlidingPiece = (name: PieceName): name is SlidingPieceName => ['queen', 'rook', 'bishop'].includes(name);
 
@@ -50,8 +53,46 @@ const getRightSibling = (position: Position): Position | null => getSibling(posi
 const getTopSibling = (position: Position): Position | null => getSibling(position, sameColumn, topRow);
 const getBottomSibling = (position: Position): Position | null => getSibling(position, sameColumn, bottomRow);
 
+const getPawnPositions = (board: Board, position: Position, [leftFn, topFn, rightFn]: GetSiblingFn[], opposedColor: Color): Position[] => {
+    const availablePositions: Position[] = [];
+    const topPosition = topFn(position);
+    const rowIndex = position[1];
 
-const directions: Record<SlidingPieceName, ((position: Position) => Position | null)[]> = {
+    if (topPosition && !board[topPosition]) {
+        availablePositions.push(topPosition);
+
+        const currentPosition = board[position];
+        const hasNotMoved = currentPosition.color === 'white' && rowIndex === '2'
+            || currentPosition.color === 'black' && rowIndex === '7';
+
+        if (hasNotMoved) {
+            const secondTopPosition = topFn(topPosition);
+            if (secondTopPosition && !board[secondTopPosition]) {
+                availablePositions.push(secondTopPosition);
+            }
+        }
+    }
+
+    const leftPosition = leftFn(position);
+    if (leftPosition && board[leftPosition]?.color === opposedColor) {
+        availablePositions.push(leftPosition);
+    }
+
+    const rightPosition = rightFn(position);
+    if (rightPosition && board[rightPosition]?.color === opposedColor) {
+        availablePositions.push(rightPosition);
+    }
+
+    return availablePositions;
+}
+
+const getWhitePawnPositions = (board: Board, position: Position): Position[] =>
+    getPawnPositions(board, position, [getLeftTopSibling, getTopSibling, getRightTopSibling], 'black');
+
+const getBlackPawnPositions = (board: Board, position: Position): Position[] =>
+    getPawnPositions(board, position, [getLeftBottomSibling, getBottomSibling, getRightBottomSibling], 'white');
+
+const directions: Record<SlidingPieceName, GetSiblingFn[]> = {
     bishop: [getLeftTopSibling, getLeftBottomSibling, getRightBottomSibling, getRightTopSibling],
     rook: [getLeftSibling, getBottomSibling, getRightSibling, getTopSibling],
     queen: [
@@ -66,7 +107,7 @@ const directions: Record<SlidingPieceName, ((position: Position) => Position | n
     ]
 }
 
-const walkBoard = (board: Board, position: Position, nextPositionFn: (position: Position) => Position, path: Position[]): void => {
+const walkBoard = (board: Board, position: Position, nextPositionFn: GetSiblingFn, path: Position[]): void => {
     if (!position) return;
 
     if (board[position]) {
@@ -95,17 +136,9 @@ export function getAvailableMoves(board: Board, selectedPosition: Position): Pos
 
     const { color, name } = piece;
     const isWhite = color === 'white';
-    const rowIndex = parseInt(selectedPosition[1]);
-    const columnId = selectedPosition[0] as Letter;
-    const columnIndex = letters.indexOf(columnId);
 
     if (name === 'pawn') {
-        const availableColumnIndexes = [columnIndex - 1, columnIndex, columnIndex + 1]
-            .filter((index) => index >= 0 && index < 8);
-        const nextRowIndex = isWhite ? rowIndex + 1 : rowIndex - 1;
-
-        return availableColumnIndexes.map((columnIndex) =>
-            `${letters[columnIndex]}${nextRowIndex}` as Position);
+        return isWhite ? getWhitePawnPositions(board, selectedPosition) : getBlackPawnPositions(board, selectedPosition);
     }
 
     if (isSlidingPiece(name)) {
