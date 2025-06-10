@@ -1,6 +1,7 @@
 import { Board } from "../types/board";
 import { Color } from "../types/color";
 import { Position } from "../types/position";
+import { getAvailablePositions } from "./get-available-positions";
 import {
     getBottomSibling,
     getLeftBottomSibling,
@@ -12,7 +13,7 @@ import {
 
 const getPawnAvailablePositions = (board: Board, position: Position, [leftFn, topFn, rightFn]: GetSiblingFn[], opposedColor: Color): Position[] => {
     const availablePositions: Position[] = [];
-    const topPosition = topFn(position);
+    const topPosition = topFn?.(position);
     const rowIndex = position[1];
 
     if (topPosition && !board[topPosition]) {
@@ -60,3 +61,9 @@ export const getWhitePawnAvailablePositions = (board: Board, position: Position)
  */
 export const getBlackPawnAvailablePositions = (board: Board, position: Position): Position[] =>
     getPawnAvailablePositions(board, position, [getLeftBottomSibling, getBottomSibling, getRightBottomSibling], 'white');
+
+export const getWhitePawnAvailableAttackPositions = (board: Board, position: Position): Position[] =>
+    getPawnAvailablePositions(board, position, [getLeftTopSibling, null, getRightTopSibling], 'black');
+
+export const getBlackPawnAvailableAttackPositions = (board: Board, position: Position): Position[] =>
+    getPawnAvailablePositions(board, position, [getLeftBottomSibling, null, getRightBottomSibling], 'white');

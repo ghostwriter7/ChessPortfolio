@@ -5,7 +5,12 @@ import { Color } from "../types/color";
 import { Piece } from "../types/piece";
 import { isSlidingPiece } from "../types/piece-name";
 import { Position } from "../types/position";
-import { getBlackPawnAvailablePositions, getWhitePawnAvailablePositions } from "./get-pawn-available-positions";
+import {
+    getBlackPawnAvailableAttackPositions,
+    getBlackPawnAvailablePositions,
+    getWhitePawnAvailableAttackPositions,
+    getWhitePawnAvailablePositions
+} from "./get-pawn-available-positions";
 import { getSiblingPosition } from "./get-sibling-position";
 import { getSlidingPieceAvailablePositions } from "./get-sliding-piece-available-positions";
 
@@ -52,9 +57,21 @@ export function getAvailablePositions(board: Board, selectedPosition: Position):
  * @returns True if the position is under potential check, false otherwise
  */
 function isPotentialCheck(board: Board, targetPosition: Position, enemyColor: Color): boolean {
-    // TODO Fix issue with pawns, the forward move might appear in available moves but it is not a threat (they attack diagonally only)
-    // It will loop infinitely, need to handle enemy king!!!
     return (Object.entries(board) as [Position, Piece | null][])
         .filter(([_, piece]) => piece?.color === enemyColor)
-        .some(([position, _]) => getAvailablePositions(board, position).includes(targetPosition))
+        .some(([position, piece]) => {
+            if (piece.name === 'pawn') {
+                const positions = enemyColor === 'white'
+                    ? getWhitePawnAvailableAttackPositions(board, position)
+                    : getBlackPawnAvailableAttackPositions(board, position);
+                return positions.includes(targetPosition);
+            }
+
+            if (piece.name === 'king') {
+                 // TODO handle king, cannot use getAvailablePositions, will loop infinitely
+                return false;
+            }
+
+            return getAvailablePositions(board, position).includes(targetPosition)
+        })
 }
