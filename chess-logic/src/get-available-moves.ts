@@ -1,5 +1,6 @@
 import { Board } from "./types/board";
 import { Color } from "./types/color";
+import { Piece } from "./types/piece";
 import { PieceName, SlidingPieceName } from "./types/piece-name";
 import { Letter, Position } from "./types/position";
 
@@ -18,7 +19,18 @@ const knightOffsets = [
     [2, -1],
     [-1, -2],
     [-2, -1]
-];
+] as const;
+
+const kingOffsets = [
+    [-1, -1],
+    [-1, 0],
+    [-1, 1],
+    [0, 1],
+    [1, 1],
+    [1, 0],
+    [1, -1],
+    [0, -1]
+] as const;
 
 const isValidRowIndex = (index: number): boolean => index >= 1 && index <= 8;
 
@@ -136,6 +148,7 @@ export function getAvailableMoves(board: Board, selectedPosition: Position): Pos
 
     const { color, name } = piece;
     const isWhite = color === 'white';
+    const enemyColor = isWhite ? 'black' : 'white';
 
     if (name === 'pawn') {
         return isWhite ? getWhitePawnPositions(board, selectedPosition) : getBlackPawnPositions(board, selectedPosition);
@@ -150,4 +163,24 @@ export function getAvailableMoves(board: Board, selectedPosition: Position): Pos
             .map(([columnOffset, rowOffset]) => getSibling(selectedPosition, columnOffset, rowOffset))
             .filter(Boolean);
     }
+
+    return kingOffsets
+        .map(([columnOffset, rowOffset]) => getSibling(selectedPosition, columnOffset, rowOffset))
+        .filter((position) => position && board[position]?.color !== color && isPotentialCheck(board, position, enemyColor));
+}
+
+
+/**
+ * Determines if a given position could be under check from enemy pieces.
+ * @param board - The current state of the chess board
+ * @param targetPosition - The position to check for potential check
+ * @param enemyColor - The color of the opposing pieces
+ * @returns True if the position is under potential check, false otherwise
+ */
+function isPotentialCheck(board: Board, targetPosition: Position, enemyColor: Color): boolean {
+    // TODO Fix issue with pawns, the forward move might appear in available moves but it is not a threat (they attack diagonally only)
+    // It will loop infinitely, need to handle enemy king!!!
+    return (Object.entries(board) as [Position, Piece | null][])
+        .filter(([position, piece]) => piece?.color === enemyColor)
+        .some(([position, piece]) => getAvailableMoves(board, position).includes(targetPosition))
 }
