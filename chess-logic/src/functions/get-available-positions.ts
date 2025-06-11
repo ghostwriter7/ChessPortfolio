@@ -8,6 +8,7 @@ import { Position } from "../types/position";
 import { getPawnAvailablePositions } from "./get-pawn-available-positions";
 import { getSiblingPosition } from "./get-sibling-position";
 import { getSlidingPieceAvailablePositions } from "./get-sliding-piece-available-positions";
+import { isSiblingOf } from "./is-sibling-of";
 
 /**
  * Determines all valid moves for a chess piece at the specified position on the board.
@@ -60,8 +61,7 @@ function isPotentialCheck(board: Board, targetPosition: Position, enemyColor: Co
             }
 
             if (piece.name === 'king') {
-                // TODO handle king, cannot use getAvailablePositions, will loop infinitely
-                return false;
+                return isSiblingOf(position, targetPosition);
             }
 
             return getAvailablePositions(board, position).includes(targetPosition)
