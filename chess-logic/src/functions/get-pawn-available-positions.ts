@@ -1,7 +1,6 @@
 import { Board } from "../types/board";
 import { Color } from "../types/color";
 import { Position } from "../types/position";
-import { getAvailablePositions } from "./get-available-positions";
 import {
     getBottomSibling,
     getLeftBottomSibling,
@@ -10,6 +9,11 @@ import {
     GetSiblingFn,
     getTopSibling
 } from "./get-sibling-position";
+
+const WhitePawnAttackPositionFns = [getLeftTopSibling, getRightTopSibling];
+const BlackPawnAttackPositionFns = [getLeftBottomSibling, getRightBottomSibling];
+const WhitePawnAllMoveFns = [getLeftTopSibling, getTopSibling, getRightTopSibling];
+const BlackPawnAllMoveFns = [getLeftBottomSibling, getBottomSibling, getRightBottomSibling];
 
 const getPawnAvailablePositions = (board: Board, position: Position, [leftFn, topFn, rightFn]: GetSiblingFn[], opposedColor: Color): Position[] => {
     const availablePositions: Position[] = [];
@@ -51,7 +55,7 @@ const getPawnAvailablePositions = (board: Board, position: Position, [leftFn, to
  * @returns Array of available positions where the white pawn can move
  */
 export const getWhitePawnAvailablePositions = (board: Board, position: Position): Position[] =>
-    getPawnAvailablePositions(board, position, [getLeftTopSibling, getTopSibling, getRightTopSibling], 'black');
+    getPawnAvailablePositions(board, position, WhitePawnAllMoveFns, 'black');
 
 /**
  * Gets all available positions for a black pawn at the specified position
@@ -60,10 +64,10 @@ export const getWhitePawnAvailablePositions = (board: Board, position: Position)
  * @returns Array of available positions where the black pawn can move
  */
 export const getBlackPawnAvailablePositions = (board: Board, position: Position): Position[] =>
-    getPawnAvailablePositions(board, position, [getLeftBottomSibling, getBottomSibling, getRightBottomSibling], 'white');
+    getPawnAvailablePositions(board, position, BlackPawnAllMoveFns, 'white');
 
 export const getWhitePawnAvailableAttackPositions = (board: Board, position: Position): Position[] =>
-    getPawnAvailablePositions(board, position, [getLeftTopSibling, null, getRightTopSibling], 'black');
+    getPawnAvailablePositions(board, position, WhitePawnAttackPositionFns, 'black');
 
 export const getBlackPawnAvailableAttackPositions = (board: Board, position: Position): Position[] =>
-    getPawnAvailablePositions(board, position, [getLeftBottomSibling, null, getRightBottomSibling], 'white');
+    getPawnAvailablePositions(board, position, BlackPawnAttackPositionFns, 'white');
