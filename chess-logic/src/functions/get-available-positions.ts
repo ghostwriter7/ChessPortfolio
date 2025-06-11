@@ -5,12 +5,7 @@ import { Color } from "../types/color";
 import { Piece } from "../types/piece";
 import { isSlidingPiece } from "../types/piece-name";
 import { Position } from "../types/position";
-import {
-    getBlackPawnAvailableAttackPositions,
-    getBlackPawnAvailablePositions,
-    getWhitePawnAvailableAttackPositions,
-    getWhitePawnAvailablePositions
-} from "./get-pawn-available-positions";
+import { getPawnAvailablePositions } from "./get-pawn-available-positions";
 import { getSiblingPosition } from "./get-sibling-position";
 import { getSlidingPieceAvailablePositions } from "./get-sliding-piece-available-positions";
 
@@ -30,7 +25,7 @@ export function getAvailablePositions(board: Board, selectedPosition: Position):
     const enemyColor = isWhite ? 'black' : 'white';
 
     if (name === 'pawn') {
-        return isWhite ? getWhitePawnAvailablePositions(board, selectedPosition) : getBlackPawnAvailablePositions(board, selectedPosition);
+        return getPawnAvailablePositions({ board, position: selectedPosition });
     }
 
     if (isSlidingPiece(name)) {
@@ -61,14 +56,11 @@ function isPotentialCheck(board: Board, targetPosition: Position, enemyColor: Co
         .filter(([_, piece]) => piece?.color === enemyColor)
         .some(([position, piece]) => {
             if (piece.name === 'pawn') {
-                const positions = enemyColor === 'white'
-                    ? getWhitePawnAvailableAttackPositions(board, position)
-                    : getBlackPawnAvailableAttackPositions(board, position);
-                return positions.includes(targetPosition);
+                return getPawnAvailablePositions({ board, position, isAttackOnly: true }).includes(targetPosition);
             }
 
             if (piece.name === 'king') {
-                 // TODO handle king, cannot use getAvailablePositions, will loop infinitely
+                // TODO handle king, cannot use getAvailablePositions, will loop infinitely
                 return false;
             }
 

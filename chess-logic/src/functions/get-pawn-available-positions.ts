@@ -1,3 +1,4 @@
+import { BLACK_PAWN_START_ROW, WHITE_PAWN_START_ROW } from "../consts/starting-positions";
 import { Board } from "../types/board";
 import { Color } from "../types/color";
 import { Position } from "../types/position";
@@ -10,64 +11,52 @@ import {
     getTopSibling
 } from "./get-sibling-position";
 
-const WhitePawnAttackPositionFns = [getLeftTopSibling, getRightTopSibling];
-const BlackPawnAttackPositionFns = [getLeftBottomSibling, getRightBottomSibling];
-const WhitePawnAllMoveFns = [getLeftTopSibling, getTopSibling, getRightTopSibling];
-const BlackPawnAllMoveFns = [getLeftBottomSibling, getBottomSibling, getRightBottomSibling];
+type PawnMovementParams = {
+    board: Board,
+    position: Position,
+    isAttackOnly?: boolean;
+}
 
-const getPawnAvailablePositions = (board: Board, position: Position, [leftFn, topFn, rightFn]: GetSiblingFn[], opposedColor: Color): Position[] => {
-    const availablePositions: Position[] = [];
-    const topPosition = topFn?.(position);
-    const rowIndex = position[1];
+const PawnPositionFns: Record<Color, { attack: [GetSiblingFn, GetSiblingFn], move: GetSiblingFn }> = {
+    white: { attack: [getLeftTopSibling, getRightTopSibling], move: getTopSibling },
+    black: { attack: [getLeftBottomSibling, getRightBottomSibling], move: getBottomSibling }
+};
 
-    if (topPosition && !board[topPosition]) {
-        availablePositions.push(topPosition);
+export const getPawnAvailablePositions = (
+    { board, isAttackOnly = false, position }: PawnMovementParams): Position[] => {
+    const pawnColor = board[position]?.color;
 
-        const currentPosition = board[position];
-        const hasNotMoved = currentPosition.color === 'white' && rowIndex === '2'
-            || currentPosition.color === 'black' && rowIndex === '7';
+    if (!pawnColor) throw new Error('Position must be occupied by a pawn piece');
 
-        if (hasNotMoved) {
-            const secondTopPosition = topFn(topPosition);
-            if (secondTopPosition && !board[secondTopPosition]) {
-                availablePositions.push(secondTopPosition);
+    const enemyColor = pawnColor === 'white' ? 'black' : 'white';
+    const { attack, move } = PawnPositionFns[pawnColor];
+
+    const availablePositions: Position[] = attack.reduce((positions, fn) => {
+        const siblingPosition = fn(position);
+        if (siblingPosition && board[siblingPosition]?.color === enemyColor) {
+            positions.push(siblingPosition);
+        }
+
+        return positions;
+    }, [] as Position[]);
+
+    if (!isAttackOnly) {
+        const siblingPosition = move(position);
+        if (siblingPosition && !board[siblingPosition]) {
+            availablePositions.push(siblingPosition);
+
+            const rowIndex = position[1];
+            const hasNotMoved = pawnColor === 'white' && rowIndex === WHITE_PAWN_START_ROW
+                || pawnColor === 'black' && rowIndex === BLACK_PAWN_START_ROW;
+
+            if (hasNotMoved) {
+                const secondTopPosition = move(siblingPosition);
+                if (!board[secondTopPosition]) {
+                    availablePositions.push(secondTopPosition);
+                }
             }
         }
     }
 
-    const leftPosition = leftFn(position);
-    if (leftPosition && board[leftPosition]?.color === opposedColor) {
-        availablePositions.push(leftPosition);
-    }
-
-    const rightPosition = rightFn(position);
-    if (rightPosition && board[rightPosition]?.color === opposedColor) {
-        availablePositions.push(rightPosition);
-    }
-
     return availablePositions;
 }
-
-/**
- * Gets all available positions for a white pawn at the specified position
- * @param board - Current state of the chess board
- * @param position - Current position of the white pawn
- * @returns Array of available positions where the white pawn can move
- */
-export const getWhitePawnAvailablePositions = (board: Board, position: Position): Position[] =>
-    getPawnAvailablePositions(board, position, WhitePawnAllMoveFns, 'black');
-
-/**
- * Gets all available positions for a black pawn at the specified position
- * @param board - Current state of the chess board
- * @param position - Current position of the black pawn
- * @returns Array of available positions where the black pawn can move
- */
-export const getBlackPawnAvailablePositions = (board: Board, position: Position): Position[] =>
-    getPawnAvailablePositions(board, position, BlackPawnAllMoveFns, 'white');
-
-export const getWhitePawnAvailableAttackPositions = (board: Board, position: Position): Position[] =>
-    getPawnAvailablePositions(board, position, WhitePawnAttackPositionFns, 'black');
-
-export const getBlackPawnAvailableAttackPositions = (board: Board, position: Position): Position[] =>
-    getPawnAvailablePositions(board, position, BlackPawnAttackPositionFns, 'white');
