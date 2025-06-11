@@ -51,7 +51,7 @@ export const getPawnAvailablePositions = (
 
             if (hasNotMoved) {
                 const secondTopPosition = move(siblingPosition);
-                if (!board[secondTopPosition]) {
+                if (secondTopPosition && !board[secondTopPosition]) {
                     availablePositions.push(secondTopPosition);
                 }
             }

@@ -4,7 +4,7 @@ import { SlidingPieceName } from "../types/piece-name";
 import { Position } from "../types/position";
 import { GetSiblingFn } from "./get-sibling-position";
 
-const walkBoard = (board: Board, position: Position, nextPositionFn: GetSiblingFn, path: Position[]): void => {
+const walkBoard = (board: Board, position: Position | null, nextPositionFn: GetSiblingFn, path: Position[]): void => {
     if (!position) return;
 
     if (board[position]) {

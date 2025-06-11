@@ -21,6 +21,8 @@ export function getAvailablePositions(board: Board, selectedPosition: Position):
 
     if (!piece) return [];
 
+    if (piece.threatenedPositions) return piece.threatenedPositions;
+
     const { color, name } = piece;
     const isWhite = color === 'white';
     const enemyColor = isWhite ? 'black' : 'white';
@@ -36,12 +38,13 @@ export function getAvailablePositions(board: Board, selectedPosition: Position):
     if (name === 'knight') {
         return KnightMovementOffsets
             .map(([columnOffset, rowOffset]) => getSiblingPosition(selectedPosition, columnOffset, rowOffset))
-            .filter(Boolean);
+            .filter(Boolean) as Position[];
     }
 
     return KingMovementOffsets
         .map(([columnOffset, rowOffset]) => getSiblingPosition(selectedPosition, columnOffset, rowOffset))
-        .filter((position) => position && board[position]?.color !== color && isPotentialCheck(board, position, enemyColor));
+        .filter((position) =>
+            position && board[position]?.color !== color && isPotentialCheck(board, position, enemyColor));
 }
 
 
@@ -56,11 +59,11 @@ function isPotentialCheck(board: Board, targetPosition: Position, enemyColor: Co
     return (Object.entries(board) as [Position, Piece | null][])
         .filter(([_, piece]) => piece?.color === enemyColor)
         .some(([position, piece]) => {
-            if (piece.name === 'pawn') {
+            if (piece!.name === 'pawn') {
                 return getPawnAvailablePositions({ board, position, isAttackOnly: true }).includes(targetPosition);
             }
 
-            if (piece.name === 'king') {
+            if (piece!.name === 'king') {
                 return isSiblingOf(position, targetPosition);
             }
 

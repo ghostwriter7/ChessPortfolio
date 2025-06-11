@@ -1,7 +1,9 @@
 import { computed, Injectable, signal } from '@angular/core';
+import { Cell } from '@app/types/cell';
 import { Player } from '@app/types/player';
 import { Color, EmptyBoard, PieceName, Letter, Position, RowNumber } from '@chess-logic';
 import { Row } from '@app/types/row';
+import { getAvailablePositions } from 'chess-logic/src/functions/get-available-positions';
 
 type State = {
   player: Player | null;
@@ -55,6 +57,13 @@ export class GameStateStore {
   });
 
   private readonly state = signal<State>({ player: null, opponent: null, isPlayerTurn: false, board: EmptyBoard });
+
+  public selectCell(cell: Cell): void {
+    const board = this.state().board;
+    const position = cell.position;
+    const availablePositions = getAvailablePositions(board, position);
+    debugger
+  }
 
   public setPlayerName(name: string): void {
     this.state.update((state) => ({ ...state, player: { ...state.player, name } }));

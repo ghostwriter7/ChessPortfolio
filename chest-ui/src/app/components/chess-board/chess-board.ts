@@ -26,6 +26,6 @@ export class ChessBoard {
   }
 
   protected selectCell(cell: Cell): void {
-
+    this.gameStateStore.selectCell(cell);
   }
 }
