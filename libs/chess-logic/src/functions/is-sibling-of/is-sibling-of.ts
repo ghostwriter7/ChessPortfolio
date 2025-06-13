@@ -1,6 +1,6 @@
 import { letters } from '../../consts/letters';
 import { Position } from '../../types/position';
-import { parsePosition } from '../parse-position';
+import { parsePosition } from '../parse-position/parse-position';
 
 /**
  * Determines if two chess board positions are adjacent (siblings) to each other.
