@@ -13,7 +13,7 @@ import {
   getRightTopSibling,
   GetSiblingFn,
   getTopSibling,
-} from '../get-sibling-position';
+} from '../../get-sibling-position/get-sibling-position';
 
 type PawnMovementParams = {
   board: Board;
