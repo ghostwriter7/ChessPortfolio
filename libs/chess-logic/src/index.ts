@@ -9,7 +9,7 @@ export * from './events/base-event';
 export * from './events/game-ended.event';
 export * from './events/game-started.event';
 
-export * from './functions/get-available-positions';
+export * from './functions/get-available-positions/get-available-positions';
 
 export * from './types/board';
 export * from './types/color';

@@ -1,14 +1,14 @@
-import { KingMovementOffsets } from '../consts/king-movement-offsets';
-import { KnightMovementOffsets } from '../consts/knight-movement-offsets';
-import { Board } from '../types/board';
-import { Color } from '../types/color';
-import { Piece } from '../types/piece';
-import { Position } from '../types/position';
-import { isSlidingPiece } from '../types/piece-name';
-import { getPawnAvailablePositions } from './get-available-positions/pawn/get-pawn-available-positions';
-import { getSiblingPosition } from './get-sibling-position/get-sibling-position';
-import { getSlidingPieceAvailablePositions } from './get-available-positions/sliding-piece/get-sliding-piece-available-positions';
-import { isSiblingOf } from './is-sibling-of/is-sibling-of';
+import { KingMovementOffsets } from '../../consts/king-movement-offsets';
+import { Board } from '../../types/board';
+import { Color } from '../../types/color';
+import { Piece } from '../../types/piece';
+import { Position } from '../../types/position';
+import { isSlidingPiece } from '../../types/piece-name';
+import { getPawnAvailablePositions } from './pawn/get-pawn-available-positions';
+import { getSiblingPosition } from '../get-sibling-position/get-sibling-position';
+import { getSlidingPieceAvailablePositions } from './sliding-piece/get-sliding-piece-available-positions';
+import { isSiblingOf } from '../is-sibling-of/is-sibling-of';
+import { getKnightAvailablePositions } from './knight/get-knight-available-positions';
 
 /**
  * Determines all valid moves for a chess piece at the specified position on the board.
@@ -39,11 +39,7 @@ export function getAvailablePositions(
   }
 
   if (name === 'knight') {
-    return KnightMovementOffsets.map(([columnOffset, rowOffset]) =>
-      getSiblingPosition(selectedPosition, columnOffset, rowOffset)
-    ).filter(
-      (position) => position && board[position]?.color !== color
-    ) as Position[];
+    return getKnightAvailablePositions(board, selectedPosition);
   }
 
   return KingMovementOffsets.map(([columnOffset, rowOffset]) =>
