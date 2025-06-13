@@ -8,7 +8,7 @@ import { isSlidingPiece } from '../types/piece-name';
 import { getPawnAvailablePositions } from './pawn/get-pawn-available-positions';
 import { getSiblingPosition } from './get-sibling-position/get-sibling-position';
 import { getSlidingPieceAvailablePositions } from './get-sliding-piece-available-positions';
-import { isSiblingOf } from './is-sibling-of';
+import { isSiblingOf } from './is-sibling-of/is-sibling-of';
 
 /**
  * Determines all valid moves for a chess piece at the specified position on the board.
