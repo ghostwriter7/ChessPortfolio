@@ -1,12 +1,17 @@
 import { Component, computed, OnInit, Signal, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { io, Socket } from 'socket.io-client';
+import {
+  GameEndedEvent,
+  GameStartedEvent,
+  JoinGameCommand,
+  LeaveGameCommand,
+} from '@chess-logic';
 import { ChessBoardComponent } from './components/chess-board/chess-board.component';
 import { GameLogsComponent } from './components/game-logs/game-logs.component';
 import { Log } from './models/log';
 import { GameLogger } from './services/game-logger/game-logger';
-import { Color } from '@chess-logic';
 import { GameStateStore } from './services/game-state-store/game-state-store';
+import { SocketService } from './services/socket/socket.service';
 import { Player } from './types/player';
 
 @Component({
@@ -29,32 +34,18 @@ export class AppComponent implements OnInit {
     Validators.required
   );
 
-  private socket!: Socket;
-
   constructor(
     private readonly gameStateStore: GameStateStore,
-    private readonly gameLogger: GameLogger
+    private readonly gameLogger: GameLogger,
+    private readonly socketService: SocketService
   ) {
     this.player = this.gameStateStore.$player;
   }
 
   public ngOnInit(): void {
-    this.socket = io('http://localhost:3000', {
-      transports: ['websocket'],
-      withCredentials: true,
-    });
-
-    this.socket.on('connect', () => {
-      console.log('Connected');
-    });
-
-    this.socket.on('disconnect', () => {
-      console.log('Disconnected');
-    });
-
-    this.socket.on(
-      'gameStarted',
-      ({ color, opponent }: { color: Color; opponent: string }) => {
+    this.socketService.doTaskOnEvent(
+      GameStartedEvent,
+      ({ color, opponent }) => {
         this.gameLogger.log(
           Log.of(`You're playing ${color} against ${opponent}`)
         );
@@ -69,7 +60,7 @@ export class AppComponent implements OnInit {
       }
     );
 
-    this.socket.on('gameEnded', (data: string) => {
+    this.socketService.doTaskOnEvent(GameEndedEvent, (data) => {
       this.gameLogger.log(Log.of(data));
       this.gameStarted.set(false);
       alert(data);
@@ -78,25 +69,29 @@ export class AppComponent implements OnInit {
 
   protected joinGame(): void {
     this.usernameControl.disable();
-    const username = this.usernameControl.value;
+    const name = this.usernameControl.value;
 
-    if (!username) return;
+    if (!name) return;
 
-    this.socket
-      .timeout(5000)
-      .emit('joinGame', username, (err: unknown, response: string) => {
+    this.socketService.dispatch(
+      new JoinGameCommand({ name }),
+      5000,
+      (err: unknown, response: string) => {
         if (err) {
           alert(err);
           this.usernameControl.enable();
         } else {
           this.gameLogger.log(Log.of(response));
-          this.gameStateStore.setPlayerName(username);
+          this.gameStateStore.setPlayerName(name);
         }
-      });
+      }
+    );
   }
 
   protected leaveGame(): void {
-    this.socket.emit('leaveGame');
+    this.socketService.dispatch(
+      new LeaveGameCommand({ reason: 'User clicked leave button' })
+    );
     this.gameStarted.set(false);
   }
 }

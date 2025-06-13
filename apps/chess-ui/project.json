@@ -13,7 +13,7 @@
         "outputPath": "dist/apps/chess-ui",
         "index": "apps/chess-ui/src/index.html",
         "browser": "apps/chess-ui/src/main.ts",
-        "polyfills": ["zone.js"],
+        "polyfills": [],
         "tsConfig": "apps/chess-ui/tsconfig.app.json",
         "assets": [
           {
