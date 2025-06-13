@@ -2,7 +2,7 @@ import { Component, computed, OnInit, Signal, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { io, Socket } from 'socket.io-client';
 import { ChessBoardComponent } from './components/chess-board/chess-board.component';
-import { GameLogs } from './components/game-logs/game-logs';
+import { GameLogsComponent } from './components/game-logs/game-logs.component';
 import { Log } from './models/log';
 import { GameLogger } from './services/game-logger/game-logger';
 import { Color } from '@chess-logic';
@@ -12,7 +12,7 @@ import { Player } from './types/player';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  imports: [ChessBoardComponent, ReactiveFormsModule, GameLogs],
+  imports: [ChessBoardComponent, ReactiveFormsModule, GameLogsComponent],
   styleUrl: './app.component.css',
 })
 export class AppComponent implements OnInit {

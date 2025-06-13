@@ -1,10 +1,11 @@
 import { NgClass } from '@angular/common';
-import { Component, Signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal } from '@angular/core';
 import { GameStateStore } from '../../services/game-state-store/game-state-store';
 import { Cell } from '../../types/cell';
 import { Rows } from '../../types/row';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-chess-board',
   imports: [NgClass],
   templateUrl: './chess-board.component.html',
