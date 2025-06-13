@@ -1,6 +1,6 @@
-import { EmptyBoard } from '../../consts/empty-board';
-import { Board } from '../../types/board';
-import { Position } from '../../types/position';
+import { EmptyBoard } from '../../../consts/empty-board';
+import { Board } from '../../../types/board';
+import { Position } from '../../../types/position';
 import { getPawnAvailablePositions } from './get-pawn-available-positions';
 
 type TestCase = {

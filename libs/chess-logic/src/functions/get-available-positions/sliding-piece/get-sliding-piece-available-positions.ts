@@ -1,9 +1,9 @@
-import { slidingPieceMovementFns } from '../consts/sliding-piece-movement-fns';
-import { Board } from '../types/board';
-import { SlidingPieceName } from '../types/piece-name';
-import { Position } from '../types/position';
-import { GetSiblingFn } from './get-sibling-position';
-import { Color } from '../types/color';
+import { slidingPieceMovementFns } from '../../../consts/sliding-piece-movement-fns';
+import { Board } from '../../../types/board';
+import { SlidingPieceName } from '../../../types/piece-name';
+import { Position } from '../../../types/position';
+import { Color } from '../../../types/color';
+import { GetSiblingFn } from '../../get-sibling-position/get-sibling-position';
 
 const walkBoard = (
   board: Board,

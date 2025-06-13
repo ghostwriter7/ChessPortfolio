@@ -1,10 +1,10 @@
 import {
   BLACK_PAWN_START_ROW,
   WHITE_PAWN_START_ROW,
-} from '../../consts/starting-positions';
-import { Board } from '../../types/board';
-import { Color } from '../../types/color';
-import { Position } from '../../types/position';
+} from '../../../consts/starting-positions';
+import { Board } from '../../../types/board';
+import { Color } from '../../../types/color';
+import { Position } from '../../../types/position';
 import {
   getBottomSibling,
   getLeftBottomSibling,
