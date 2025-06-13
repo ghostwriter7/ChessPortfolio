@@ -41,7 +41,9 @@ export function getAvailablePositions(
   if (name === 'knight') {
     return KnightMovementOffsets.map(([columnOffset, rowOffset]) =>
       getSiblingPosition(selectedPosition, columnOffset, rowOffset)
-    ).filter(Boolean) as Position[];
+    ).filter(
+      (position) => position && board[position]?.color !== color
+    ) as Position[];
   }
 
   return KingMovementOffsets.map(([columnOffset, rowOffset]) =>

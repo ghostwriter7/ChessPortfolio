@@ -1,43 +1,47 @@
-import { Component, computed, OnInit, Signal, signal } from "@angular/core";
+import { Component, computed, OnInit, Signal, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { io, Socket } from 'socket.io-client';
-import { ChessBoard } from './components/chess-board/chess-board';
+import { ChessBoardComponent } from './components/chess-board/chess-board.component';
 import { GameLogs } from './components/game-logs/game-logs';
 import { Log } from './models/log';
 import { GameLogger } from './services/game-logger/game-logger';
 import { Color } from '@chess-logic';
-import { GameStateStore } from "./services/game-state-store/game-state-store";
-import { Player } from "./types/player";
+import { GameStateStore } from './services/game-state-store/game-state-store';
+import { Player } from './types/player';
 
 @Component({
   selector: 'app-root',
-  templateUrl: './app.html',
-  imports: [
-    ChessBoard,
-    ReactiveFormsModule,
-    GameLogs
-  ],
-  styleUrl: './app.css'
+  templateUrl: './app.component.html',
+  imports: [ChessBoardComponent, ReactiveFormsModule, GameLogs],
+  styleUrl: './app.component.css',
 })
-export class App implements OnInit {
+export class AppComponent implements OnInit {
   protected readonly gameStarted = signal(false);
-  protected readonly isAnonymous = computed(() => !this.gameStateStore.$player());
+  protected readonly isAnonymous = computed(
+    () => !this.gameStateStore.$player()
+  );
   protected readonly player: Signal<Player | null>;
-  protected readonly opponentName = computed(() => this.gameStateStore.$opponent()?.name);
-  protected readonly usernameControl = new FormControl('', Validators.required);
+  protected readonly opponentName = computed(
+    () => this.gameStateStore.$opponent()?.name
+  );
+  protected readonly usernameControl = new FormControl(
+    Math.random().toFixed(2).toString(),
+    Validators.required
+  );
 
   private socket!: Socket;
 
   constructor(
     private readonly gameStateStore: GameStateStore,
-    private readonly gameLogger: GameLogger) {
+    private readonly gameLogger: GameLogger
+  ) {
     this.player = this.gameStateStore.$player;
   }
 
   public ngOnInit(): void {
     this.socket = io('http://localhost:3000', {
       transports: ['websocket'],
-      withCredentials: true
+      withCredentials: true,
     });
 
     this.socket.on('connect', () => {
@@ -48,13 +52,21 @@ export class App implements OnInit {
       console.log('Disconnected');
     });
 
-    this.socket.on('gameStarted', ({ color, opponent }: { color: Color, opponent: string; }) => {
-      this.gameLogger.log(Log.of(`You're playing ${color} against ${opponent}`));
-      this.gameStateStore.setPlayerColor(color);
-      this.gameStateStore.setOpponent(opponent, color === 'white' ? 'black' : 'white');
-      if (color === 'white') this.gameStateStore.setPlayerTurn();
-      this.gameStarted.set(true);
-    });
+    this.socket.on(
+      'gameStarted',
+      ({ color, opponent }: { color: Color; opponent: string }) => {
+        this.gameLogger.log(
+          Log.of(`You're playing ${color} against ${opponent}`)
+        );
+        this.gameStateStore.setPlayerColor(color);
+        this.gameStateStore.setOpponent(
+          opponent,
+          color === 'white' ? 'black' : 'white'
+        );
+        if (color === 'white') this.gameStateStore.setPlayerTurn();
+        this.gameStarted.set(true);
+      }
+    );
 
     this.socket.on('gameEnded', (data: string) => {
       this.gameLogger.log(Log.of(data));

@@ -5,8 +5,8 @@
       <div
         class="cell"
         [class.selectable]="cell.occupiedBy?.color === playerColor()"
-        [ngClass]="cell.color"
-        (click)="selectCell(cell)"
+        [ngClass]="cell.modifierClasses"
+        (click)="onCellClick(cell)"
       >
         @if (cell.occupiedBy) {
           <span class="figure" [ngClass]="cell.occupiedBy.color">{{ cell.occupiedBy.name }}</span>

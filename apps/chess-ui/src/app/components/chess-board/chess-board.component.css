@@ -59,6 +59,18 @@
   &.black {
     background-color: black;
   }
+
+  &.active {
+    background-color: lightseagreen;
+  }
+
+  &.capture {
+    background-color: red;
+  }
+
+  &.move {
+    background-color: green;
+  }
 }
 
 .figure {

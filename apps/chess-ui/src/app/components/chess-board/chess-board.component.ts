@@ -6,26 +6,25 @@ import { Row } from '../../types/row';
 
 @Component({
   selector: 'app-chess-board',
-  imports: [
-    NgClass
-  ],
-  templateUrl: './chess-board.html',
-  styleUrl: './chess-board.css'
+  imports: [NgClass],
+  templateUrl: './chess-board.component.html',
+  styleUrl: './chess-board.component.css',
 })
-export class ChessBoard {
+export class ChessBoardComponent {
   protected readonly active: Signal<boolean>;
   protected playerColor = computed(() => this.gameStateStore.$player()?.color);
 
   protected readonly board: Signal<Row[]>;
-  protected readonly letters =
-    new Array(8).fill(null).map((_, index) => String.fromCharCode(index + 65));
+  protected readonly letters = new Array(8)
+    .fill(null)
+    .map((_, index) => String.fromCharCode(index + 65));
 
   constructor(private readonly gameStateStore: GameStateStore) {
     this.board = this.gameStateStore.$board;
     this.active = this.gameStateStore.$isPlayerTurn;
   }
 
-  protected selectCell(cell: Cell): void {
-    this.gameStateStore.selectCell(cell);
+  protected onCellClick(cell: Cell): void {
+    this.gameStateStore.handleCellClick(cell);
   }
 }
