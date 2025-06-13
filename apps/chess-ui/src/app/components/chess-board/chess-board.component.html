@@ -1,23 +1,26 @@
 <div class="grid" [class.active]="active()">
-  @for (row of board(); track $index) {
-    <span class="row-number">{{ row.index }}</span>
-    @for (cell of row.cells; track $index) {
-      <div
-        class="cell"
-        [class.selectable]="cell.occupiedBy?.color === playerColor()"
-        [ngClass]="cell.modifierClasses"
-        (click)="onCellClick(cell)"
-      >
-        @if (cell.occupiedBy) {
-          <span class="figure" [ngClass]="cell.occupiedBy.color">{{ cell.occupiedBy.name }}</span>
-        }
-      </div>
+  @if (board(); as board) {
+    @for (row of board; track $index) {
+      <span class="row-number">{{ row.index }}</span>
+      @for (cell of row.cells; track $index) {
+        <div
+          class="cell"
+          [ngClass]="cell.modifierClasses()"
+          (click)="onCellClick(cell)"
+        >
+          @if (cell.occupiedBy(); as occupiedBy) {
+            <span class="figure" [ngClass]="occupiedBy.color">{{ occupiedBy.name }}</span>
+          }
+        </div>
+      }
     }
-  }
 
-  <div class="column-labels">
-    @for (letter of letters; track letter) {
-      <span class="column-letter">{{ letter }}</span>
-    }
-  </div>
+    <div class="column-labels">
+      @for (letter of letters; track letter) {
+        <span class="column-letter">{{ letter }}</span>
+      }
+    </div>
+  } @else {
+    <p>Please, log in to start the game</p>
+  }
 </div>

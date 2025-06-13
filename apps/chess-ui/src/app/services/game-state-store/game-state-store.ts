@@ -1,4 +1,4 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { computed, Injectable, Signal, signal } from '@angular/core';
 import {
   Color,
   EmptyBoard,
@@ -12,10 +12,9 @@ import { Cell } from '../../types/cell';
 import { Player } from '../../types/player';
 import { Row } from '../../types/row';
 import { CellClass } from '../../types/cell-class';
+import { Board } from '../../types/board';
 
 type State = {
-  highlightedPositions: Position[] | null;
-  selectedPosition: Position | null;
   player: Player | null;
   opponent: Player | null;
   isPlayerTurn: boolean;
@@ -34,66 +33,54 @@ export class GameStateStore {
   public readonly $player = computed(() => this.state().player);
   public readonly $opponent = computed(() => this.state().opponent);
   public readonly $isPlayerTurn = computed(() => this.state().isPlayerTurn);
-  public readonly $board = computed(() => {
-    const { board, highlightedPositions, selectedPosition } = this.state();
+  public readonly $board: Signal<Board>;
 
-    const rows: Row[] = new Array(8).fill(null).map((_, index) => {
-      const rowIndex = index + 1;
-      const isOddRow = rowIndex % 2 === 1;
-      return {
-        index: rowIndex,
-        cells: new Array(8).fill(null).map((_, index) => {
-          const cellIndex = (index + 1) as RowNumber;
-          const position = `${this.getLetterFromCellIndex(
-            cellIndex
-          )}${rowIndex}` as Position;
-          const isOddCell = cellIndex % 2 === 1;
-          const color = isOddRow
-            ? isOddCell
-              ? 'black'
-              : 'white'
-            : isOddCell
-            ? 'white'
-            : 'black';
-          const modifierClasses = (
-            highlightedPositions?.includes(position) && board[position]
-              ? [color, 'capture']
-              : highlightedPositions?.includes(position)
-              ? [color, 'move']
-              : selectedPosition === position
-              ? [color, 'active']
-              : [color]
-          ) as CellClass[];
-
-          return {
-            color,
-            index: cellIndex,
-            position,
-            occupiedBy: board[position],
-            modifierClasses,
-          };
-        }),
-      };
-    });
-
-    const player = this.state().player;
-    if (!player || player!.color === 'white') return rows.reverse();
-
-    return rows;
-  });
-
+  private readonly board = signal<Board>(null);
   private readonly state = signal<State>({
-    highlightedPositions: null,
-    selectedPosition: null,
     player: null,
     opponent: null,
     isPlayerTurn: false,
     board: EmptyBoard,
   });
+  private readonly highlightedPositions = signal<Position[] | null>(null);
+  private readonly selectedPosition = signal<Position | null>(null);
+
+  constructor() {
+    this.$board = this.board.asReadonly();
+  }
+
+  public initializeBoard(playerColor: Color): void {
+    const isBlackCell = (cellIndex: number, rowIndex: number): boolean =>
+      (cellIndex + rowIndex) % 2 === 1;
+
+    const rows: Row[] = new Array(8).fill(null).map((_, index) => {
+      const rowIndex = index + 1;
+      return {
+        index: rowIndex,
+        cells: new Array(8).fill(null).map((_, index) => {
+          const cellIndex = (index + 1) as RowNumber;
+          const position = this.createPositionFromCellAndRowIndexes(
+            cellIndex,
+            rowIndex
+          );
+          const color = isBlackCell(cellIndex, rowIndex) ? 'black' : 'white';
+
+          return {
+            color,
+            index: cellIndex,
+            position,
+            occupiedBy: computed(() => this.state().board[position]),
+            modifierClasses: this.createModifierClassesSignal(position, color),
+          };
+        }),
+      };
+    });
+
+    this.board.set(playerColor === 'white' ? rows.reverse() : rows);
+  }
 
   public handleCellClick({ occupiedBy, position }: Cell): void {
-    const currentSelectedPosition = this.state().selectedPosition;
-    const isOwnPiece = occupiedBy?.color === this.$player()?.color;
+    const currentSelectedPosition = this.selectedPosition();
 
     if (currentSelectedPosition) {
       const availablePositions = getAvailablePositions(
@@ -106,23 +93,11 @@ export class GameStateStore {
       }
     }
 
-    if (isOwnPiece) {
-      const availablePositions = getAvailablePositions(
-        this.state().board,
-        position
-      );
-      this.state.update((state) => ({
-        ...state,
-        highlightedPositions: availablePositions,
-        selectedPosition: position,
-      }));
-    } else {
-      this.state.update((state) => ({
-        ...state,
-        highlightedPositions: null,
-        selectedPosition: null,
-      }));
-    }
+    const isOwnPiece = occupiedBy()?.color === this.$player()?.color;
+    this.highlightedPositions.set(
+      isOwnPiece ? getAvailablePositions(this.state().board, position) : null
+    );
+    this.selectedPosition.set(isOwnPiece ? position : null);
   }
 
   public setPlayerName(name: string): void {
@@ -153,5 +128,42 @@ export class GameStateStore {
 
   private getLetterFromCellIndex(cellIndex: number): Letter {
     return String.fromCharCode(cellIndex + 96) as Letter;
+  }
+
+  private createModifierClassesSignal(
+    position: Position,
+    color: Color
+  ): Signal<CellClass[]> {
+    return computed<CellClass[]>(() => {
+      const highlightedPositions = this.highlightedPositions();
+
+      const { board, player } = this.state();
+      const isInHighlightedPositions = highlightedPositions?.includes(position);
+
+      if (isInHighlightedPositions && board[position]) {
+        return [color, 'capture'];
+      }
+
+      if (isInHighlightedPositions) {
+        return [color, 'move'];
+      }
+
+      if (this.selectedPosition() === position) {
+        return [color, 'active'];
+      }
+
+      if (player?.color === board[position]?.color) {
+        return [color, 'selectable'];
+      }
+
+      return [color];
+    });
+  }
+
+  private createPositionFromCellAndRowIndexes(
+    cellIndex: number,
+    rowIndex: number
+  ): Position {
+    return `${this.getLetterFromCellIndex(cellIndex)}${rowIndex}` as Position;
   }
 }

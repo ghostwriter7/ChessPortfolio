@@ -63,6 +63,7 @@ export class AppComponent implements OnInit {
           opponent,
           color === 'white' ? 'black' : 'white'
         );
+        this.gameStateStore.initializeBoard(color);
         if (color === 'white') this.gameStateStore.setPlayerTurn();
         this.gameStarted.set(true);
       }

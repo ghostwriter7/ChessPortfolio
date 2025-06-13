@@ -2,7 +2,7 @@ import { NgClass } from '@angular/common';
 import { Component, computed, Signal } from '@angular/core';
 import { GameStateStore } from '../../services/game-state-store/game-state-store';
 import { Cell } from '../../types/cell';
-import { Row } from '../../types/row';
+import { Board } from '../../types/board';
 
 @Component({
   selector: 'app-chess-board',
@@ -14,7 +14,7 @@ export class ChessBoardComponent {
   protected readonly active: Signal<boolean>;
   protected playerColor = computed(() => this.gameStateStore.$player()?.color);
 
-  protected readonly board: Signal<Row[]>;
+  protected readonly board: Signal<Board>;
   protected readonly letters = new Array(8)
     .fill(null)
     .map((_, index) => String.fromCharCode(index + 65));
