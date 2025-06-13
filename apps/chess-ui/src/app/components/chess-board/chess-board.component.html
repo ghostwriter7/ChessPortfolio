@@ -1,6 +1,6 @@
 <div class="grid" [class.active]="active()">
-  @if (board(); as board) {
-    @for (row of board; track $index) {
+  @if (rows(); as rows) {
+    @for (row of rows; track $index) {
       <span class="row-number">{{ row.index }}</span>
       @for (cell of row.cells; track $index) {
         <div

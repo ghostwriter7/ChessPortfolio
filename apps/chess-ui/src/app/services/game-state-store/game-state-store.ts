@@ -1,52 +1,38 @@
 import { computed, Injectable, Signal, signal } from '@angular/core';
 import {
+  Board,
   Color,
   EmptyBoard,
   getAvailablePositions,
   Letter,
-  PieceName,
   Position,
   RowNumber,
 } from '@chess-logic';
 import { Cell } from '../../types/cell';
 import { Player } from '../../types/player';
-import { Row } from '../../types/row';
+import { Row, Rows } from '../../types/row';
 import { CellClass } from '../../types/cell-class';
-import { Board } from '../../types/board';
-
-type State = {
-  player: Player | null;
-  opponent: Player | null;
-  isPlayerTurn: boolean;
-  board: {
-    [position in Position]: {
-      name: PieceName;
-      color: Color;
-    } | null;
-  };
-};
 
 @Injectable({
   providedIn: 'root',
 })
 export class GameStateStore {
-  public readonly $player = computed(() => this.state().player);
-  public readonly $opponent = computed(() => this.state().opponent);
-  public readonly $isPlayerTurn = computed(() => this.state().isPlayerTurn);
-  public readonly $board: Signal<Board>;
+  public readonly $player: Signal<Player | null>;
+  public readonly $opponent: Signal<Player | null>;
+  public readonly $isPlayerTurn = computed(() => !!this.player()?.isTurn);
+  public readonly $rows: Signal<Rows>;
 
-  private readonly board = signal<Board>(null);
-  private readonly state = signal<State>({
-    player: null,
-    opponent: null,
-    isPlayerTurn: false,
-    board: EmptyBoard,
-  });
+  private readonly rows = signal<Rows>(null);
+  private readonly board = signal<Board>(EmptyBoard);
   private readonly highlightedPositions = signal<Position[] | null>(null);
   private readonly selectedPosition = signal<Position | null>(null);
+  private readonly player = signal<Player | null>(null);
+  private readonly opponent = signal<Player | null>(null);
 
   constructor() {
-    this.$board = this.board.asReadonly();
+    this.$rows = this.rows.asReadonly();
+    this.$player = this.player.asReadonly();
+    this.$opponent = this.opponent.asReadonly();
   }
 
   public initializeBoard(playerColor: Color): void {
@@ -69,14 +55,14 @@ export class GameStateStore {
             color,
             index: cellIndex,
             position,
-            occupiedBy: computed(() => this.state().board[position]),
+            occupiedBy: computed(() => this.board()[position]),
             modifierClasses: this.createModifierClassesSignal(position, color),
           };
         }),
       };
     });
 
-    this.board.set(playerColor === 'white' ? rows.reverse() : rows);
+    this.rows.set(playerColor === 'white' ? rows.reverse() : rows);
   }
 
   public handleCellClick({ occupiedBy, position }: Cell): void {
@@ -84,7 +70,7 @@ export class GameStateStore {
 
     if (currentSelectedPosition) {
       const availablePositions = getAvailablePositions(
-        this.state().board,
+        this.board(),
         currentSelectedPosition
       );
 
@@ -95,35 +81,29 @@ export class GameStateStore {
 
     const isOwnPiece = occupiedBy()?.color === this.$player()?.color;
     this.highlightedPositions.set(
-      isOwnPiece ? getAvailablePositions(this.state().board, position) : null
+      isOwnPiece ? getAvailablePositions(this.board(), position) : null
     );
     this.selectedPosition.set(isOwnPiece ? position : null);
   }
 
   public setPlayerName(name: string): void {
-    this.state.update((state) => ({
-      ...state,
-      player: { ...state.player, name },
-    }));
+    this.player.update((player) => ({ ...player, name }));
   }
 
   public setPlayerColor(color: Color): void {
-    this.state.update((state) => ({
-      ...state,
-      player: { ...state.player!, color },
-    }));
+    this.player.update((player) => ({ ...player, color }));
   }
 
   public setOpponent(name: string, color: Color): void {
-    this.state.update((state) => ({ ...state, opponent: { name, color } }));
+    this.opponent.set({ name, color });
   }
 
   public setPlayerTurn(): void {
-    this.state.update((state) => ({ ...state, isPlayerTurn: true }));
+    this.player.update((player) => ({ ...player, isTurn: true }));
   }
 
   public setOpponentTurn(): void {
-    this.state.update((state) => ({ ...state, isPlayerTurn: false }));
+    this.player.update((player) => ({ ...player, isTurn: false }));
   }
 
   private getLetterFromCellIndex(cellIndex: number): Letter {
@@ -137,7 +117,7 @@ export class GameStateStore {
     return computed<CellClass[]>(() => {
       const highlightedPositions = this.highlightedPositions();
 
-      const { board, player } = this.state();
+      const board = this.board();
       const isInHighlightedPositions = highlightedPositions?.includes(position);
 
       if (isInHighlightedPositions && board[position]) {
@@ -152,7 +132,7 @@ export class GameStateStore {
         return [color, 'active'];
       }
 
-      if (player?.color === board[position]?.color) {
+      if (this.player()?.color === board[position]?.color) {
         return [color, 'selectable'];
       }
 

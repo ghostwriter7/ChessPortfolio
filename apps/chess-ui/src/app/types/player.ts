@@ -1,4 +1,5 @@
 export type Player = {
-  name: string;
+  name?: string;
   color?: string;
-}
+  isTurn?: boolean;
+};

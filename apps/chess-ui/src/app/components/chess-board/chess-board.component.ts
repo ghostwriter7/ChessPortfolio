@@ -1,8 +1,8 @@
 import { NgClass } from '@angular/common';
-import { Component, computed, Signal } from '@angular/core';
+import { Component, Signal } from '@angular/core';
 import { GameStateStore } from '../../services/game-state-store/game-state-store';
 import { Cell } from '../../types/cell';
-import { Board } from '../../types/board';
+import { Rows } from '../../types/row';
 
 @Component({
   selector: 'app-chess-board',
@@ -12,15 +12,14 @@ import { Board } from '../../types/board';
 })
 export class ChessBoardComponent {
   protected readonly active: Signal<boolean>;
-  protected playerColor = computed(() => this.gameStateStore.$player()?.color);
 
-  protected readonly board: Signal<Board>;
+  protected readonly rows: Signal<Rows>;
   protected readonly letters = new Array(8)
     .fill(null)
     .map((_, index) => String.fromCharCode(index + 65));
 
   constructor(private readonly gameStateStore: GameStateStore) {
-    this.board = this.gameStateStore.$board;
+    this.rows = this.gameStateStore.$rows;
     this.active = this.gameStateStore.$isPlayerTurn;
   }
 
