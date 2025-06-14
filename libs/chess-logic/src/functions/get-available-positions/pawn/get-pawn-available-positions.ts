@@ -14,6 +14,7 @@ import {
   GetSiblingFn,
   getTopSibling,
 } from '../../get-sibling-position/get-sibling-position';
+import { getOppositeColor } from '../../get-opposite-color/get-opposite-color';
 
 type PawnMovementParams = {
   board: Board;
@@ -44,7 +45,7 @@ export const getPawnAvailablePositions = ({
 
   if (!pawnColor) throw new Error('Position must be occupied by a pawn piece');
 
-  const enemyColor = pawnColor === 'white' ? 'black' : 'white';
+  const enemyColor = getOppositeColor(pawnColor);
   const { attack, move } = PawnPositionFns[pawnColor];
 
   const availablePositions: Position[] = attack.reduce((positions, fn) => {

@@ -3,6 +3,7 @@ import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   GameEndedEvent,
   GameStartedEvent,
+  getOppositeColor,
   JoinGameCommand,
   LeaveGameCommand,
 } from '@chess-logic';
@@ -50,10 +51,7 @@ export class AppComponent implements OnInit {
           Log.of(`You're playing ${color} against ${opponent}`)
         );
         this.gameStateStore.setPlayerColor(color);
-        this.gameStateStore.setOpponent(
-          opponent,
-          color === 'white' ? 'black' : 'white'
-        );
+        this.gameStateStore.setOpponent(opponent, getOppositeColor(color));
         this.gameStateStore.initializeBoard(color);
         if (color === 'white') this.gameStateStore.setPlayerTurn();
         this.gameStarted.set(true);
