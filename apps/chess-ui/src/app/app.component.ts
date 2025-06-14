@@ -12,7 +12,7 @@ import { GameLogsComponent } from './components/game-logs/game-logs.component';
 import { Log } from './models/log';
 import { GameLogger } from './services/game-logger/game-logger';
 import { GameStateStore } from './services/game-state-store/game-state-store';
-import { SocketService } from './services/socket/socket.service';
+import { GameMediator } from './services/game-mediator/game-mediator';
 import { Player } from './types/player';
 
 @Component({
@@ -38,27 +38,24 @@ export class AppComponent implements OnInit {
   constructor(
     private readonly gameStateStore: GameStateStore,
     private readonly gameLogger: GameLogger,
-    private readonly socketService: SocketService
+    private readonly gameMediator: GameMediator
   ) {
     this.player = this.gameStateStore.$player;
   }
 
   public ngOnInit(): void {
-    this.socketService.doTaskOnEvent(
-      GameStartedEvent,
-      ({ color, opponent }) => {
-        this.gameLogger.log(
-          Log.of(`You're playing ${color} against ${opponent}`)
-        );
-        this.gameStateStore.setPlayerColor(color);
-        this.gameStateStore.setOpponent(opponent, getOppositeColor(color));
-        this.gameStateStore.initializeBoard(color);
-        if (color === 'white') this.gameStateStore.setPlayerTurn();
-        this.gameStarted.set(true);
-      }
-    );
+    this.gameMediator.subscribe(GameStartedEvent, ({ color, opponent }) => {
+      this.gameLogger.log(
+        Log.of(`You're playing ${color} against ${opponent}`)
+      );
+      this.gameStateStore.setPlayerColor(color);
+      this.gameStateStore.setOpponent(opponent, getOppositeColor(color));
+      this.gameStateStore.initializeBoard(color);
+      if (color === 'white') this.gameStateStore.setPlayerTurn();
+      this.gameStarted.set(true);
+    });
 
-    this.socketService.doTaskOnEvent(GameEndedEvent, (data) => {
+    this.gameMediator.subscribe(GameEndedEvent, (data) => {
       this.gameLogger.log(Log.of(data));
       this.gameStarted.set(false);
       alert(data);
@@ -71,7 +68,7 @@ export class AppComponent implements OnInit {
 
     if (!name) return;
 
-    this.socketService.dispatch(
+    this.gameMediator.dispatch(
       new JoinGameCommand({ name }),
       5000,
       (err: unknown, response: string) => {
@@ -87,7 +84,7 @@ export class AppComponent implements OnInit {
   }
 
   protected leaveGame(): void {
-    this.socketService.dispatch(
+    this.gameMediator.dispatch(
       new LeaveGameCommand({ reason: 'User clicked leave button' })
     );
     this.gameStarted.set(false);

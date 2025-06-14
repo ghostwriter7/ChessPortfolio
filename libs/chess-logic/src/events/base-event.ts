@@ -8,10 +8,12 @@ export abstract class BaseEvent<T = unknown> {
   protected constructor(public readonly payload: T) {}
 }
 
-export type BaseEventSubClass<TPayload = unknown> = new (
+export type EventClass<TPayload = unknown> = new (
   payload: TPayload
 ) => BaseEvent<TPayload>;
 
 export type EventInstance<TPayload = unknown> = InstanceType<
-  BaseEventSubClass<TPayload>
+  EventClass<TPayload>
 >;
+
+export type EventHandler<TPayload = unknown> = (payload: TPayload) => void;

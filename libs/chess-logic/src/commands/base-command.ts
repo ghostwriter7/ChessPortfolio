@@ -1,11 +1,11 @@
-export class BaseCommand<T> {
+export abstract class BaseCommand<T> {
   public readonly createdAt = Date.now();
 
   public get name(): string {
     return this.constructor.name;
   }
 
-  constructor(public readonly payload: T) {}
+  protected constructor(public readonly payload: T) {}
 }
 
 export type BaseCommandSubClass<TPayload = unknown> = new (
