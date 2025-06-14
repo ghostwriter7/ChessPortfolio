@@ -3,7 +3,7 @@ import { Position } from '../../../types/position';
 import { KingMovementOffsets } from '../../../consts/king-movement-offsets';
 import { getSiblingPosition } from '../../get-sibling-position/get-sibling-position';
 import { getOppositeColor } from '../../get-opposite-color/get-opposite-color';
-import { isPotentialCheck } from '../../is-potential-check/is-potential-check';
+import { isKingThreatened } from '../../is-king-threatened/is-king-threatened';
 
 export function getKingAvailablePositions(
   board: Board,
@@ -26,7 +26,7 @@ export function getKingAvailablePositions(
     if (
       siblingPosition &&
       board[siblingPosition]?.color !== color &&
-      !isPotentialCheck(board, siblingPosition, enemyColor)
+      !isKingThreatened(board, siblingPosition, enemyColor)
     ) {
       return [...positions, siblingPosition];
     }

@@ -1,5 +1,5 @@
 import { Board } from '../../../types/board';
-import { EmptyBoard } from '../../../consts/empty-board';
+import { UntouchedBoard } from '../../../consts/untouched-board';
 import { Position } from '../../../types/position';
 import { getSlidingPieceAvailablePositions } from './get-sliding-piece-available-positions';
 
@@ -14,17 +14,17 @@ describe('getSlidingPieceAvailablePositions', () => {
     test.each<TestCase>([
       {
         position: 'a1',
-        board: EmptyBoard,
+        board: UntouchedBoard,
         expectedPositions: [],
       },
       {
         position: 'a1',
-        board: { ...EmptyBoard, a2: null },
+        board: { ...UntouchedBoard, a2: null },
         expectedPositions: ['a2', 'a3', 'a4', 'a5', 'a6', 'a7'],
       },
       {
         position: 'd5',
-        board: { ...EmptyBoard, d5: EmptyBoard.a1, a1: null },
+        board: { ...UntouchedBoard, d5: UntouchedBoard.a1, a1: null },
         expectedPositions: [
           'c5',
           'b5',
@@ -60,17 +60,17 @@ describe('getSlidingPieceAvailablePositions', () => {
     test.each<TestCase>([
       {
         position: 'c1',
-        board: EmptyBoard,
+        board: UntouchedBoard,
         expectedPositions: [],
       },
       {
         position: 'c1',
-        board: { ...EmptyBoard, b2: null, d2: null },
+        board: { ...UntouchedBoard, b2: null, d2: null },
         expectedPositions: ['b2', 'd2', 'a3', 'e3', 'f4', 'g5', 'h6'],
       },
       {
         position: 'f4',
-        board: { ...EmptyBoard, f4: EmptyBoard.c1, c1: null },
+        board: { ...UntouchedBoard, f4: UntouchedBoard.c1, c1: null },
         expectedPositions: ['d6', 'e5', 'g5', 'h6', 'g3', 'e3', 'c7'],
       },
     ])(
@@ -94,22 +94,22 @@ describe('getSlidingPieceAvailablePositions', () => {
     test.each<TestCase>([
       {
         position: 'd1',
-        board: EmptyBoard,
+        board: UntouchedBoard,
         expectedPositions: [],
       },
       {
         position: 'd8',
-        board: EmptyBoard,
+        board: UntouchedBoard,
         expectedPositions: [],
       },
       {
         position: 'd1',
-        board: { ...EmptyBoard, d2: null, d4: EmptyBoard.d2 },
+        board: { ...UntouchedBoard, d2: null, d4: UntouchedBoard.d2 },
         expectedPositions: ['d2', 'd3'],
       },
       {
         position: 'e4',
-        board: { ...EmptyBoard, d1: null, e4: EmptyBoard.d1 },
+        board: { ...UntouchedBoard, d1: null, e4: UntouchedBoard.d1 },
         expectedPositions: [
           'a4',
           'b4',

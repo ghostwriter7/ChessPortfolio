@@ -1,0 +1,1 @@
+export const DIAGONAL_DIRECTION_OFFSETS = [-1, 1];

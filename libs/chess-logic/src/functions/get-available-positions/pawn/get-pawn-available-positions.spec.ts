@@ -1,4 +1,4 @@
-import { EmptyBoard } from '../../../consts/empty-board';
+import { UntouchedBoard } from '../../../consts/untouched-board';
 import { Board } from '../../../types/board';
 import { Position } from '../../../types/position';
 import { getPawnAvailablePositions } from './get-pawn-available-positions';
@@ -13,20 +13,20 @@ type TestCase = {
 describe('getPawnAvailablePositions', () => {
   test.each<TestCase>([
     {
-      board: () => EmptyBoard,
+      board: () => UntouchedBoard,
       position: 'a2',
       expectedPositions: ['a3', 'a4'],
       message: 'White pawn is at its starting position on an empty board',
     },
     {
-      board: () => EmptyBoard,
+      board: () => UntouchedBoard,
       position: 'd7',
       expectedPositions: ['d6', 'd5'],
       message: 'Black pawn is at its starting position on an empty board',
     },
     {
       board: () => {
-        const board = structuredClone(EmptyBoard);
+        const board = structuredClone(UntouchedBoard);
         board.c3 = board.b1;
         board.b1 = null;
         return board;
@@ -37,7 +37,7 @@ describe('getPawnAvailablePositions', () => {
     },
     {
       board: () => {
-        const board = structuredClone(EmptyBoard);
+        const board = structuredClone(UntouchedBoard);
         board.e6 = board.e2;
         board.e2 = null;
         return board;
@@ -63,20 +63,20 @@ describe('getPawnAvailablePositions', () => {
 
   test.each<TestCase>([
     {
-      board: () => EmptyBoard,
+      board: () => UntouchedBoard,
       expectedPositions: [],
       position: 'e2',
       message: 'White pawn is at its starting position on an empty board',
     },
     {
-      board: () => EmptyBoard,
+      board: () => UntouchedBoard,
       expectedPositions: [],
       position: 'b7',
       message: 'Black pawn is at its starting position on an empty board',
     },
     {
       board: () => {
-        const board = structuredClone(EmptyBoard);
+        const board = structuredClone(UntouchedBoard);
         board.a6 = board.a2;
         board.a2 = null;
         return board;
@@ -87,7 +87,7 @@ describe('getPawnAvailablePositions', () => {
     },
     {
       board: () => {
-        const board = structuredClone(EmptyBoard);
+        const board = structuredClone(UntouchedBoard);
         board.h6 = board.h2;
         board.h2 = null;
         return board;
@@ -98,7 +98,7 @@ describe('getPawnAvailablePositions', () => {
     },
     {
       board: () => {
-        const board = structuredClone(EmptyBoard);
+        const board = structuredClone(UntouchedBoard);
         board.c6 = board.c2;
         board.c2 = null;
         return board;

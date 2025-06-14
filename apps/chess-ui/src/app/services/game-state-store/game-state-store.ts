@@ -2,7 +2,7 @@ import { computed, Injectable, Signal, signal } from '@angular/core';
 import {
   Board,
   Color,
-  EmptyBoard,
+  UntouchedBoard,
   getAvailablePositions,
   Letter,
   Position,
@@ -23,7 +23,7 @@ export class GameStateStore {
   public readonly $rows: Signal<Rows>;
 
   private readonly rows = signal<Rows>(null);
-  private readonly board = signal<Board>(EmptyBoard);
+  private readonly board = signal<Board>(UntouchedBoard);
   private readonly highlightedPositions = signal<Position[] | null>(null);
   private readonly selectedPosition = signal<Position | null>(null);
   private readonly player = signal<Player | null>(null);
