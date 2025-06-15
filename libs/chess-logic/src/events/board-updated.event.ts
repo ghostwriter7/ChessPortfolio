@@ -1,8 +1,7 @@
 import { BaseEvent } from './base-event';
-import { Piece } from '../types/piece';
-import { Position } from '../types/position';
+import { Board } from '../types/board';
 
-type BoardUpdatedEventPayload = Record<Position, Piece | null>;
+type BoardUpdatedEventPayload = Partial<Board>;
 
 export class BoardUpdatedEvent extends BaseEvent<BoardUpdatedEventPayload> {
   constructor(payload: BoardUpdatedEventPayload) {

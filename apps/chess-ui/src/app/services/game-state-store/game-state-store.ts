@@ -1,17 +1,20 @@
 import { computed, Injectable, Signal, signal } from '@angular/core';
 import {
   Board,
+  BoardUpdatedEvent,
   Color,
-  UntouchedBoard,
   getAvailablePositions,
   Letter,
+  MakeMoveCommand,
   Position,
   RowNumber,
+  UntouchedBoard,
 } from '@chess-logic';
 import { Cell } from '../../types/cell';
 import { Player } from '../../types/player';
 import { Row, Rows } from '../../types/row';
 import { CellClass } from '../../types/cell-class';
+import { GameMediator } from '../game-mediator/game-mediator';
 
 @Injectable({
   providedIn: 'root',
@@ -29,10 +32,15 @@ export class GameStateStore {
   private readonly player = signal<Player | null>(null);
   private readonly opponent = signal<Player | null>(null);
 
-  constructor() {
+  constructor(private readonly gameMediator: GameMediator) {
     this.$rows = this.rows.asReadonly();
     this.$player = this.player.asReadonly();
     this.$opponent = this.opponent.asReadonly();
+
+    this.gameMediator.subscribe(
+      BoardUpdatedEvent,
+      this.handleBoardUpdatedEvent.bind(this)
+    );
   }
 
   public initializeBoard(playerColor: Color): void {
@@ -65,6 +73,17 @@ export class GameStateStore {
     this.rows.set(playerColor === 'white' ? rows.reverse() : rows);
   }
 
+  public handleBoardUpdatedEvent(boardUpdatedEvent: BoardUpdatedEvent): void {
+    const boardUpdate = boardUpdatedEvent.payload;
+    this.board.update((board) => ({ ...board, ...boardUpdate }));
+    this.highlightedPositions.set(null);
+    this.selectedPosition.set(null);
+    this.player.update((player) => ({
+      ...player,
+      isTurn: !this.$isPlayerTurn(),
+    }));
+  }
+
   public handleCellClick({ occupiedBy, position }: Cell): void {
     const currentSelectedPosition = this.selectedPosition();
 
@@ -75,7 +94,14 @@ export class GameStateStore {
       );
 
       if (availablePositions.includes(position)) {
-        // move piece and return
+        const makeMoveCommand = new MakeMoveCommand({
+          from: currentSelectedPosition,
+          to: position,
+        });
+        this.gameMediator.dispatch(makeMoveCommand);
+        this.highlightedPositions.set(null);
+        this.selectedPosition.set(null);
+        return;
       }
     }
 

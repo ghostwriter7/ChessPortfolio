@@ -1,6 +1,11 @@
 import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
-import { CommandInstance, EventClass, EventHandler } from '@chess-logic';
+import {
+  CommandInstance,
+  EventClass,
+  EventHandler,
+  EventInstance,
+} from '@chess-logic';
 
 @Injectable({ providedIn: 'root' })
 export class GameMediator {
@@ -28,7 +33,7 @@ export class GameMediator {
 
   public subscribe<TPayload>(
     event: EventClass<TPayload>,
-    handler: EventHandler<TPayload>
+    handler: EventHandler<EventInstance<TPayload>>
   ): void {
     const eventName = event.prototype.name;
     const existingHandlers = this.eventHandlers.get(eventName) || [];
@@ -38,7 +43,7 @@ export class GameMediator {
 
   public unsubscribe<TPayload>(
     event: EventClass<TPayload>,
-    handler: EventHandler<TPayload>
+    handler: EventHandler<EventInstance<TPayload>>
   ): void {
     const eventName = event.prototype.name;
     const existingHandlers = this.eventHandlers.get(eventName) || [];

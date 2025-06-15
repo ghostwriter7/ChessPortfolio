@@ -1,13 +1,21 @@
-import express from 'express';
-import { createServer } from 'node:http';
-import { Server, Socket } from 'socket.io';
 import {
+  Board,
+  BoardUpdatedEvent,
+  Color,
   GameEndedEvent,
   GameStartedEvent,
+  getOppositeColor,
   JoinGameCommand,
   JoinGameCommandPayload,
   LeaveGameCommand,
+  MakeMoveCommand,
+  MakeMoveCommandPayload,
+  UntouchedBoard,
 } from '@chess-logic';
+import express from 'express';
+import { createServer } from 'node:http';
+import { Server, Socket } from 'socket.io';
+import { MakeMoveCommandValidator } from './validators/make-move-command.validator';
 
 const PORT = process.env.PORT || 3000;
 
@@ -15,14 +23,12 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server);
 
-app.get('/', (req, res) => {
-  res.send('Hello World');
-});
-
 const waitingPlayers: Socket[] = [];
 const games = new Map<
   string,
   {
+    activeColor: Color;
+    board: Board;
     white: Socket;
     black: Socket;
     players: Map<string, Socket>;
@@ -36,6 +42,39 @@ io.on('connection', (socket) => {
   socket.on(LeaveGameCommand.name, () => {
     leaveGame(socket);
     socket.disconnect();
+  });
+
+  socket.on(MakeMoveCommand.name, (command: MakeMoveCommandPayload) => {
+    const gameId = socketToGameId.get(socket.id);
+
+    const game = games.get(gameId);
+    const { activeColor, board } = game;
+
+    if (!MakeMoveCommandValidator.validate(board, activeColor, command)) {
+      console.error(`Invalid move command sent by ${socket.data.username}`);
+      return;
+    }
+
+    const { from, to } = command;
+    const startPiece = board[from];
+
+    console.log(
+      `A valid move was made: ${from} -> ${to} by ${socket.data.username} (${activeColor})`
+    );
+    const boardUpdate: Partial<Board> = {
+      [to]: { ...startPiece, untouched: true },
+      [from]: null,
+    };
+    game.board = { ...board, ...boardUpdate };
+    game.activeColor = getOppositeColor(activeColor);
+
+    // need to check if it is checkmate and dispatch the appropriate event if so
+    // if (isCheckmate(board) { ... }
+
+    io.to(gameId).emit(
+      BoardUpdatedEvent.name,
+      new BoardUpdatedEvent(boardUpdate)
+    );
   });
 
   socket.on(
@@ -59,6 +98,8 @@ io.on('connection', (socket) => {
         black.join(gameId);
 
         games.set(gameId, {
+          activeColor: 'white',
+          board: structuredClone(UntouchedBoard),
           white,
           black,
           players: new Map([
@@ -107,9 +148,9 @@ server.listen(PORT, () => {
 });
 
 function leaveGame(socket: Socket): void {
-  const gameId = socketToGameId.get(socket.id)!;
+  const gameId = socketToGameId.get(socket.id);
 
-  const game = games.get(gameId)!;
+  const game = games.get(gameId);
   const opponent = game.white.id === socket.id ? game.black : game.white;
 
   opponent.emit(

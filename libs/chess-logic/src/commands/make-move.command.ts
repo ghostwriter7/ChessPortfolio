@@ -1,13 +1,13 @@
 import { BaseCommand } from './base-command';
 import { Position } from '../types/position';
 
-type MakeMovePayload = {
+export type MakeMoveCommandPayload = {
   from: Position;
   to: Position;
 };
 
-export class MakeMoveCommand extends BaseCommand<MakeMovePayload> {
-  constructor(payload: MakeMovePayload) {
+export class MakeMoveCommand extends BaseCommand<MakeMoveCommandPayload> {
+  constructor(payload: MakeMoveCommandPayload) {
     super(payload);
   }
 }
