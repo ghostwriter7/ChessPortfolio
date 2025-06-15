@@ -111,14 +111,20 @@ io.on('connection', (socket) => {
         socketToGameId.set(socket.id, gameId);
         socketToGameId.set(opponent.id, gameId);
 
-        white.emit(GameStartedEvent.name, {
-          color: 'white',
-          opponent: black.data.username,
-        });
-        black.emit(GameStartedEvent.name, {
-          color: 'black',
-          opponent: white.data.username,
-        });
+        white.emit(
+          GameStartedEvent.name,
+          new GameStartedEvent({
+            color: 'white',
+            opponent: black.data.username,
+          })
+        );
+        black.emit(
+          GameStartedEvent.name,
+          new GameStartedEvent({
+            color: 'black',
+            opponent: white.data.username,
+          })
+        );
 
         console.log(
           `Game started: ${gameId} between ${white.data.username} and ${black.data.username}`
@@ -155,7 +161,7 @@ function leaveGame(socket: Socket): void {
 
   opponent.emit(
     GameEndedEvent.name,
-    `${socket.data.username} disconnected from the game`
+    new GameEndedEvent(`${socket.data.username} disconnected from the game`)
   );
   opponent.leave(gameId);
 
