@@ -73,7 +73,7 @@ io.on('connection', (socket) => {
       socketToGameId.delete(socket.id);
       socketToGameId.delete(opponent.id);
       gameIdToGameManagers.delete(gameId);
-      gameManager.unsubscribe();
+      gameManager.destroy();
 
       console.log(`Game ended: ${gameId}}`);
     } else {

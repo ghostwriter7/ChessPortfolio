@@ -4,6 +4,7 @@ import { UntouchedBoard } from '../../consts/untouched-board';
 import { isKingThreatened } from './is-king-threatened';
 import { getOppositeColor } from '../get-opposite-color/get-opposite-color';
 import { Color } from '../../types/color';
+import { movePiece, mutateBoard } from '../mutate-board/mutate-board';
 
 type TestCase = {
   kingAt: Position;
@@ -11,16 +12,6 @@ type TestCase = {
   expected: boolean;
   message: string;
 };
-
-const movePiece =
-  (from: Position, to: Position): ((board: Board) => Board) =>
-  (board: Board) => ({ ...board, [to]: board[from], [from]: null });
-
-const pipe = (...movePieceFns: ReturnType<typeof movePiece>[]): Board =>
-  movePieceFns.reduce(
-    (currentBoard, movePieceFn) => movePieceFn(currentBoard),
-    UntouchedBoard
-  );
 
 describe('isKingThreatened', () => {
   test.each<TestCase>([
@@ -38,43 +29,43 @@ describe('isKingThreatened', () => {
     },
     {
       kingAt: 'e6',
-      board: pipe(movePiece('e1', 'e6')),
+      board: mutateBoard(movePiece('e1', 'e6')),
       expected: true,
       message: 'White king has pawns on both diagonals',
     },
     {
       kingAt: 'c5',
-      board: pipe(movePiece('e8', 'c6'), movePiece('e1', 'c5')),
+      board: mutateBoard(movePiece('e8', 'c6'), movePiece('e1', 'c5')),
       expected: true,
       message: 'White king meets a Black King',
     },
     {
       kingAt: 'd4',
-      board: pipe(movePiece('c7', 'e5'), movePiece('e1', 'd4')),
+      board: mutateBoard(movePiece('c7', 'e5'), movePiece('e1', 'd4')),
       expected: true,
       message: 'White king is threatened by black pawn',
     },
     {
       kingAt: 'e4',
-      board: pipe(movePiece('g8', 'f6'), movePiece('e1', 'e4')),
+      board: mutateBoard(movePiece('g8', 'f6'), movePiece('e1', 'e4')),
       expected: true,
       message: 'White king is threatened by black knight',
     },
     {
       kingAt: 'f3',
-      board: pipe(movePiece('c8', 'h5'), movePiece('e1', 'f3')),
+      board: mutateBoard(movePiece('c8', 'h5'), movePiece('e1', 'f3')),
       expected: true,
       message: 'White king is threatened by black bishop',
     },
     {
       kingAt: 'e4',
-      board: pipe(movePiece('h8', 'h4'), movePiece('e1', 'e4')),
+      board: mutateBoard(movePiece('h8', 'h4'), movePiece('e1', 'e4')),
       expected: true,
       message: 'White king is threatened by black rook',
     },
     {
       kingAt: 'd5',
-      board: pipe(movePiece('d8', 'h5'), movePiece('e1', 'd5')),
+      board: mutateBoard(movePiece('d8', 'h5'), movePiece('e1', 'd5')),
       expected: true,
       message: 'Black king is threatened by white queen',
     },

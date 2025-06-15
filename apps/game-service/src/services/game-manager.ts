@@ -79,7 +79,7 @@ export class GameManager {
    * Unsubscribes all event listeners and cleans up game resources
    * Should be called when the game is terminated
    */
-  public unsubscribe(): void {
+  public destroy(): void {
     this.game.players.forEach((player) => {
       player.removeAllListeners(LeaveGameCommand.name);
       player.removeAllListeners(MakeMoveCommand.name);
@@ -97,7 +97,7 @@ export class GameManager {
         console.log(`Game ended: ${gameId}`);
         player.disconnect(true);
         opponent.disconnect(true);
-        this.unsubscribe();
+        this.destroy();
       });
     });
   }
