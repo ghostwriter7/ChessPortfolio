@@ -1,9 +1,12 @@
-export class Log {
-  constructor(public readonly message: string,
-              public readonly timestamp: Date = new Date()) {
-  }
+import { LogCreatedEvent } from '@chess-logic';
 
-  public static of(message: string): Log {
-    return new Log(message);
+export class Log {
+  constructor(
+    public readonly message: string,
+    public readonly timestamp: Date = new Date()
+  ) {}
+
+  public static from({ payload, createdAt }: LogCreatedEvent): Log {
+    return new Log(payload, createdAt);
   }
 }

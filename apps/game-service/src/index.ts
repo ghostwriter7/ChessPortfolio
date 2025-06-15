@@ -8,6 +8,7 @@ import {
   JoinGameCommand,
   JoinGameCommandPayload,
   LeaveGameCommand,
+  LogCreatedEvent,
   MakeMoveCommand,
   MakeMoveCommandPayload,
   UntouchedBoard,
@@ -61,8 +62,10 @@ io.on('connection', (socket) => {
     console.log(
       `A valid move was made: ${from} -> ${to} by ${socket.data.username} (${activeColor})`
     );
+
+    const capturedPiece = board[to];
     const boardUpdate: Partial<Board> = {
-      [to]: { ...startPiece, untouched: true },
+      [to]: { ...startPiece, untouched: false },
       [from]: null,
     };
     game.board = { ...board, ...boardUpdate };
@@ -75,6 +78,14 @@ io.on('connection', (socket) => {
       BoardUpdatedEvent.name,
       new BoardUpdatedEvent(boardUpdate)
     );
+    io.to(gameId).emit(
+      LogCreatedEvent.name,
+      new LogCreatedEvent(
+        `${socket.data.username} made a move from ${from} to ${to}. ${
+          capturedPiece ? `Captured ${capturedPiece.name}.` : ''
+        }`
+      )
+    );
   });
 
   socket.on(
@@ -85,9 +96,17 @@ io.on('connection', (socket) => {
 
       if (waitingPlayers.length === 0) {
         waitingPlayers.push(socket);
-        callback('Waiting for another player...');
+        socket.emit(
+          LogCreatedEvent.name,
+          new LogCreatedEvent('Waiting for another player...')
+        );
+        callback();
       } else {
-        callback('Game is about to begin...');
+        callback();
+        socket.emit(
+          LogCreatedEvent.name,
+          new LogCreatedEvent('Game is about to begin...')
+        );
         const opponent = waitingPlayers.shift()!;
         const gameId = `game-${socket.id}-${opponent.id}`;
 
@@ -111,19 +130,28 @@ io.on('connection', (socket) => {
         socketToGameId.set(socket.id, gameId);
         socketToGameId.set(opponent.id, gameId);
 
+        const blackPlayer = black.data.username;
+        const whitePlayer = white.data.username;
+
         white.emit(
           GameStartedEvent.name,
           new GameStartedEvent({
             color: 'white',
-            opponent: black.data.username,
+            opponent: blackPlayer,
           })
         );
         black.emit(
           GameStartedEvent.name,
           new GameStartedEvent({
             color: 'black',
-            opponent: white.data.username,
+            opponent: whitePlayer,
           })
+        );
+        io.to(gameId).emit(
+          LogCreatedEvent.name,
+          new LogCreatedEvent(
+            `The game has started! ${whitePlayer} (white) vs ${blackPlayer} (black). Fight!`
+          )
         );
 
         console.log(
@@ -162,6 +190,10 @@ function leaveGame(socket: Socket): void {
   opponent.emit(
     GameEndedEvent.name,
     new GameEndedEvent(`${socket.data.username} disconnected from the game`)
+  );
+  opponent.emit(
+    LogCreatedEvent.name,
+    new LogCreatedEvent(`${socket.data.username} left the game`)
   );
   opponent.leave(gameId);
 

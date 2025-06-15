@@ -10,6 +10,7 @@ export * from './events/base-event';
 export * from './events/board-updated.event';
 export * from './events/game-ended.event';
 export * from './events/game-started.event';
+export * from './events/log-created.event';
 
 export * from './functions/get-available-positions/get-available-positions';
 export * from './functions/get-opposite-color/get-opposite-color';

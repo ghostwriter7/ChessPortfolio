@@ -1,5 +1,5 @@
 export abstract class BaseEvent<T = unknown> {
-  public readonly createdAt = Date.now();
+  public readonly createdAt = new Date();
 
   public get name(): string {
     return this.constructor.name;

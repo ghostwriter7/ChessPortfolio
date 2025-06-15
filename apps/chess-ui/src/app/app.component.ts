@@ -9,8 +9,6 @@ import {
 } from '@chess-logic';
 import { ChessBoardComponent } from './components/chess-board/chess-board.component';
 import { GameLogsComponent } from './components/game-logs/game-logs.component';
-import { Log } from './models/log';
-import { GameLogger } from './services/game-logger/game-logger';
 import { GameStateStore } from './services/game-state-store/game-state-store';
 import { GameMediator } from './services/game-mediator/game-mediator';
 import { Player } from './types/player';
@@ -37,7 +35,6 @@ export class AppComponent implements OnInit {
 
   constructor(
     private readonly gameStateStore: GameStateStore,
-    private readonly gameLogger: GameLogger,
     private readonly gameMediator: GameMediator
   ) {
     this.player = this.gameStateStore.$player;
@@ -47,9 +44,6 @@ export class AppComponent implements OnInit {
     this.gameMediator.subscribe(
       GameStartedEvent,
       ({ payload: { color, opponent } }) => {
-        this.gameLogger.log(
-          Log.of(`You're playing ${color} against ${opponent}`)
-        );
         this.gameStateStore.setPlayerColor(color);
         this.gameStateStore.setOpponent(opponent, getOppositeColor(color));
         this.gameStateStore.initializeBoard(color);
@@ -58,10 +52,8 @@ export class AppComponent implements OnInit {
       }
     );
 
-    this.gameMediator.subscribe(GameEndedEvent, ({ payload }) => {
-      this.gameLogger.log(Log.of(payload));
+    this.gameMediator.subscribe(GameEndedEvent, () => {
       this.gameStarted.set(false);
-      alert(payload);
     });
   }
 
@@ -74,12 +66,11 @@ export class AppComponent implements OnInit {
     this.gameMediator.dispatch(
       new JoinGameCommand({ name }),
       5000,
-      (err: unknown, response: string) => {
+      (err: unknown) => {
         if (err) {
           alert(err);
           this.usernameControl.enable();
         } else {
-          this.gameLogger.log(Log.of(response));
           this.gameStateStore.setPlayerName(name);
         }
       }
