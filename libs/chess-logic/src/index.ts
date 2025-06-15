@@ -14,6 +14,7 @@ export * from './events/log-created.event';
 
 export * from './functions/get-available-positions/get-available-positions';
 export * from './functions/get-opposite-color/get-opposite-color';
+export * from './functions/is-checkmate/is-checkmate';
 
 export * from './types/board';
 export * from './types/color';
