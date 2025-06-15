@@ -41,16 +41,18 @@ export class AppComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    this.gameMediator.subscribe(
-      GameStartedEvent,
-      ({ payload: { color, opponent } }) => {
-        this.gameStateStore.setPlayerColor(color);
-        this.gameStateStore.setOpponent(opponent, getOppositeColor(color));
-        this.gameStateStore.initializeBoard(color);
-        if (color === 'white') this.gameStateStore.setPlayerTurn();
-        this.gameStarted.set(true);
-      }
-    );
+    this.gameMediator.subscribe(GameStartedEvent, ({ payload }) => {
+      const playerName = this.gameStateStore.$player()?.name;
+      const playerColor = playerName === payload.white ? 'white' : 'black';
+      const opponentColor = getOppositeColor(playerColor);
+
+      this.gameStateStore.setPlayerColor(playerColor);
+      this.gameStateStore.setOpponent(payload[opponentColor], opponentColor);
+      this.gameStateStore.initializeBoard(playerColor);
+
+      if (playerColor === 'white') this.gameStateStore.setPlayerTurn();
+      this.gameStarted.set(true);
+    });
 
     this.gameMediator.subscribe(GameEndedEvent, () => {
       this.gameStarted.set(false);

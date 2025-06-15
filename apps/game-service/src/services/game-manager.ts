@@ -56,28 +56,16 @@ export class GameManager {
     white.join(gameId);
     black.join(gameId);
 
-    white.emit(
-      GameStartedEvent.name,
-      new GameStartedEvent({
-        color: 'white',
-        opponent: blackName,
-      })
+    const gameStartedEvent = new GameStartedEvent({
+      white: whiteName,
+      black: blackName,
+    });
+    this.io.to(gameId).emit(gameStartedEvent.name, gameStartedEvent);
+
+    const logCreatedEvent = new LogCreatedEvent(
+      `The game has started! ${whiteName} (white) vs ${blackName} (black). Fight!`
     );
-    black.emit(
-      GameStartedEvent.name,
-      new GameStartedEvent({
-        color: 'black',
-        opponent: whiteName,
-      })
-    );
-    this.io
-      .to(gameId)
-      .emit(
-        LogCreatedEvent.name,
-        new LogCreatedEvent(
-          `The game has started! ${whiteName} (white) vs ${blackName} (black). Fight!`
-        )
-      );
+    this.io.to(gameId).emit(logCreatedEvent.name, logCreatedEvent);
 
     console.log(
       `Game started: ${gameId} between ${whiteName} and ${blackName}`
