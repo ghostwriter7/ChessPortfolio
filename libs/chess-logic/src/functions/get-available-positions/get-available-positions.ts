@@ -13,23 +13,23 @@ import { getSlidingPieceAvailablePositions } from './sliding-piece/get-sliding-p
  * This function handles different piece types (pawn, knight, king, and sliding pieces)
  * and ensures moves don't put the player's own king in check when required.
  * @param board - The current state of the chess board
- * @param selectedPosition - The position of the piece to calculate moves for
+ * @param piecePosition - The position of the piece to calculate moves for
  * @param shouldCheckOwnKingSafety - When true, filters out moves that would put the player's own king in check
  * @param includeCaptureMovesOnly - When true, returns only moves that capture opponent's pieces
  * @returns An array of valid positions where the piece can move
  */
 export function getAvailablePositions({
   board,
-  selectedPosition,
+  piecePosition,
   shouldCheckOwnKingSafety = true,
   includeCaptureMovesOnly = false,
 }: {
   board: Board;
-  selectedPosition: Position;
+  piecePosition: Position;
   shouldCheckOwnKingSafety?: boolean;
   includeCaptureMovesOnly?: boolean;
 }): Position[] {
-  const piece = board[selectedPosition];
+  const piece = board[piecePosition];
 
   if (!piece) return [];
 
@@ -40,25 +40,25 @@ export function getAvailablePositions({
   if (name === 'pawn') {
     availablePositions = getPawnAvailablePositions({
       board,
-      position: selectedPosition,
+      position: piecePosition,
       isAttackOnly: includeCaptureMovesOnly,
     });
   } else if (isSlidingPiece(name)) {
     availablePositions = getSlidingPieceAvailablePositions(
       board,
       name,
-      selectedPosition
+      piecePosition
     );
   } else if (name === 'knight') {
-    availablePositions = getKnightAvailablePositions(board, selectedPosition);
+    availablePositions = getKnightAvailablePositions(board, piecePosition);
   } else {
-    return getKingAvailablePositions(board, selectedPosition);
+    return getKingAvailablePositions(board, piecePosition);
   }
 
   if (shouldCheckOwnKingSafety) {
     const isKingSafePredicate = (position: Position) =>
       !isKingThreatened(
-        movePiece(selectedPosition, position)({ ...board }),
+        movePiece(piecePosition, position)({ ...board }),
         color
       );
 

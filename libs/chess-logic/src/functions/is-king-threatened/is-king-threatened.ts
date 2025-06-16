@@ -28,7 +28,7 @@ export function isKingThreatened(board: Board, kingColor: Color): boolean {
     .some(([position, _]) =>
       getAvailablePositions({
         board,
-        selectedPosition: position,
+        piecePosition: position,
         shouldCheckOwnKingSafety: false,
         includeCaptureMovesOnly: true,
       }).includes(kingPosition)

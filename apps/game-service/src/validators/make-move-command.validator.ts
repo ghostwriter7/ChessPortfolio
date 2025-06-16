@@ -30,7 +30,7 @@ export class MakeMoveCommandValidator {
     const isAttemptToCaptureOwnPiece = board[to]?.color === playerColor;
     const pieceCannotMoveToPosition = !getAvailablePositions({
       board,
-      selectedPosition: from,
+      piecePosition: from,
     }).includes(to);
 
     return !(

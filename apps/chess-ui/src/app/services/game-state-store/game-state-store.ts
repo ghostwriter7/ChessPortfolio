@@ -90,7 +90,7 @@ export class GameStateStore {
     if (currentSelectedPosition) {
       const availablePositions = getAvailablePositions({
         board: this.board(),
-        selectedPosition: currentSelectedPosition,
+        piecePosition: currentSelectedPosition,
       });
 
       if (availablePositions.includes(position)) {
@@ -107,7 +107,12 @@ export class GameStateStore {
 
     const isOwnPiece = occupiedBy()?.color === this.$player()?.color;
     this.highlightedPositions.set(
-      isOwnPiece ? getAvailablePositions(this.board(), position) : null
+      isOwnPiece
+        ? getAvailablePositions({
+            board: this.board(),
+            piecePosition: position,
+          })
+        : null
     );
     this.selectedPosition.set(isOwnPiece ? position : null);
   }
