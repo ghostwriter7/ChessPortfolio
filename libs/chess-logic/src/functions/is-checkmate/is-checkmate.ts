@@ -2,7 +2,6 @@ import { Board } from '../../types/board';
 import { Color } from '../../types/color';
 import { isKingThreatened } from '../is-king-threatened/is-king-threatened';
 import { Position } from '../../types/position';
-import { getOppositeColor } from '../get-opposite-color/get-opposite-color';
 import { getKingAvailablePositions } from '../get-available-positions/king/get-king-available-positions';
 
 /**
@@ -22,7 +21,7 @@ export function isCheckmate(board: Board, playerColor: Color): boolean {
   if (!kingPosition) throw new Error(`${playerColor} king not found on board`);
 
   return (
-    isKingThreatened(board, kingPosition, getOppositeColor(playerColor)) &&
+    isKingThreatened(board, playerColor) &&
     getKingAvailablePositions(board, kingPosition).length === 0
   );
 }

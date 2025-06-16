@@ -2,7 +2,6 @@ import { Board } from '../../../types/board';
 import { Position } from '../../../types/position';
 import { KingMovementOffsets } from '../../../consts/king-movement-offsets';
 import { getSiblingPosition } from '../../get-sibling-position/get-sibling-position';
-import { getOppositeColor } from '../../get-opposite-color/get-opposite-color';
 import { isKingThreatened } from '../../is-king-threatened/is-king-threatened';
 import { movePiece } from '../../mutate-board/mutate-board';
 
@@ -15,7 +14,6 @@ export function getKingAvailablePositions(
   if (king?.name !== 'king') throw new Error('Not a king');
 
   const { color } = king;
-  const enemyColor = getOppositeColor(color);
 
   return KingMovementOffsets.reduce((positions, [columnOffset, rowOffset]) => {
     const potentialPosition = getSiblingPosition(
@@ -29,8 +27,7 @@ export function getKingAvailablePositions(
       board[potentialPosition]?.color !== color &&
       !isKingThreatened(
         movePiece(position, potentialPosition)({ ...board }),
-        potentialPosition,
-        enemyColor
+        color
       )
     ) {
       return [...positions, potentialPosition];

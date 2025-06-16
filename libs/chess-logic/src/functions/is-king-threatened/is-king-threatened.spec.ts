@@ -1,13 +1,11 @@
-import { Position } from '../../types/position';
 import { Board } from '../../types/board';
 import { UntouchedBoard } from '../../consts/untouched-board';
 import { isKingThreatened } from './is-king-threatened';
-import { getOppositeColor } from '../get-opposite-color/get-opposite-color';
 import { Color } from '../../types/color';
 import { movePiece, mutateBoard } from '../mutate-board/mutate-board';
 
 type TestCase = {
-  kingAt: Position;
+  color: Color;
   board: Board;
   expected: boolean;
   message: string;
@@ -16,64 +14,61 @@ type TestCase = {
 describe('isKingThreatened', () => {
   test.each<TestCase>([
     {
-      kingAt: 'e1',
+      color: 'white',
       board: UntouchedBoard,
       expected: false,
       message: 'White king is at its starting position on an empty board',
     },
     {
-      kingAt: 'e8',
+      color: 'white',
       board: UntouchedBoard,
       expected: false,
       message: 'Black king is at its starting position on an empty board',
     },
     {
-      kingAt: 'e6',
+      color: 'white',
       board: mutateBoard(movePiece('e1', 'e6')),
       expected: true,
       message: 'White king has pawns on both diagonals',
     },
     {
-      kingAt: 'c5',
+      color: 'white',
       board: mutateBoard(movePiece('e8', 'c6'), movePiece('e1', 'c5')),
       expected: true,
       message: 'White king meets a Black King',
     },
     {
-      kingAt: 'd4',
+      color: 'white',
       board: mutateBoard(movePiece('c7', 'e5'), movePiece('e1', 'd4')),
       expected: true,
       message: 'White king is threatened by black pawn',
     },
     {
-      kingAt: 'e4',
+      color: 'white',
       board: mutateBoard(movePiece('g8', 'f6'), movePiece('e1', 'e4')),
       expected: true,
       message: 'White king is threatened by black knight',
     },
     {
-      kingAt: 'f3',
+      color: 'white',
       board: mutateBoard(movePiece('c8', 'h5'), movePiece('e1', 'f3')),
       expected: true,
       message: 'White king is threatened by black bishop',
     },
     {
-      kingAt: 'e4',
+      color: 'white',
       board: mutateBoard(movePiece('h8', 'h4'), movePiece('e1', 'e4')),
       expected: true,
       message: 'White king is threatened by black rook',
     },
     {
-      kingAt: 'd5',
+      color: 'white',
       board: mutateBoard(movePiece('d8', 'h5'), movePiece('e1', 'd5')),
       expected: true,
       message: 'Black king is threatened by white queen',
     },
-  ])('should return $expected when $message', ({ board, kingAt, expected }) => {
-    const kingColor = board[kingAt]?.color as Color;
-    const enemyColor = getOppositeColor(kingColor);
-
-    const isCheck = isKingThreatened(board, kingAt, enemyColor);
+  ])('should return $expected when $message', ({ board, color, expected }) => {
+    const isCheck = isKingThreatened(board, color);
 
     expect(isCheck).toBe(expected);
   });

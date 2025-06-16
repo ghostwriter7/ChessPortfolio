@@ -5,6 +5,7 @@ import {
   GameEndedEvent,
   GameStartedEvent,
   getOppositeColor,
+  isCheckmate,
   LeaveGameCommand,
   LogCreatedEvent,
   MakeMoveCommand,
@@ -144,10 +145,12 @@ export class GameManager {
           [from]: null,
         };
         game.board = { ...board, ...boardUpdate };
-        game.activeColor = getOppositeColor(activeColor);
 
-        // need to check if it is checkmate and dispatch the appropriate event if so
-        // if (isCheckmate(board) { ... }
+        if (isCheckmate(board, activeColor)) {
+          // this.io.to(gameId).emit(GameEndedEvent.name, new GameEndedEvent());
+        }
+
+        game.activeColor = getOppositeColor(activeColor);
 
         this.io
           .to(gameId)
