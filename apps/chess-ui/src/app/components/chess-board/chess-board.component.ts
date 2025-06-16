@@ -1,5 +1,10 @@
 import { NgClass } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  Signal,
+} from '@angular/core';
 import { GameStateStore } from '../../services/game-state-store/game-state-store';
 import { Cell } from '../../types/cell';
 import { Rows } from '../../types/row';
@@ -9,9 +14,9 @@ import { Rows } from '../../types/row';
   selector: 'app-chess-board',
   imports: [NgClass],
   templateUrl: './chess-board.component.html',
-  styleUrl: './chess-board.component.css',
+  styleUrl: './chess-board.component.scss',
 })
-export class ChessBoardComponent {
+export class ChessBoard {
   protected readonly active: Signal<boolean>;
 
   protected readonly rows: Signal<Rows>;
@@ -19,7 +24,9 @@ export class ChessBoardComponent {
     .fill(null)
     .map((_, index) => String.fromCharCode(index + 65));
 
-  constructor(private readonly gameStateStore: GameStateStore) {
+  private readonly gameStateStore = inject(GameStateStore);
+
+  constructor() {
     this.rows = this.gameStateStore.$rows;
     this.active = this.gameStateStore.$isPlayerTurn;
   }

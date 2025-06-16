@@ -1,4 +1,11 @@
-import { Component, computed, OnInit, Signal, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  OnInit,
+  Signal,
+  signal,
+} from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   GameEndedEvent,
@@ -7,8 +14,8 @@ import {
   JoinGameCommand,
   LeaveGameCommand,
 } from '@chess-logic';
-import { ChessBoardComponent } from './components/chess-board/chess-board.component';
-import { GameLogsComponent } from './components/game-logs/game-logs.component';
+import { ChessBoard } from './components/chess-board/chess-board.component';
+import { GameLogs } from './components/game-logs/game-logs.component';
 import { GameStateStore } from './services/game-state-store/game-state-store';
 import { GameMediator } from './services/game-mediator/game-mediator';
 import { Player } from './types/player';
@@ -16,10 +23,10 @@ import { Player } from './types/player';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  imports: [ChessBoardComponent, ReactiveFormsModule, GameLogsComponent],
-  styleUrl: './app.component.css',
+  imports: [ChessBoard, ReactiveFormsModule, GameLogs],
+  styleUrl: './app.component.scss',
 })
-export class AppComponent implements OnInit {
+export class App implements OnInit {
   protected readonly gameStarted = signal(false);
   protected readonly isAnonymous = computed(
     () => !this.gameStateStore.$player()
@@ -33,10 +40,10 @@ export class AppComponent implements OnInit {
     Validators.required
   );
 
-  constructor(
-    private readonly gameStateStore: GameStateStore,
-    private readonly gameMediator: GameMediator
-  ) {
+  private readonly gameStateStore = inject(GameStateStore);
+  private readonly gameMediator = inject(GameMediator);
+
+  constructor() {
     this.player = this.gameStateStore.$player;
   }
 

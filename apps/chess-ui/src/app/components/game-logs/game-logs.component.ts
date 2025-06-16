@@ -1,5 +1,10 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  Signal,
+} from '@angular/core';
 import { Log } from '../../models/log';
 import { GameLogger } from '../../services/game-logger/game-logger';
 
@@ -8,12 +13,14 @@ import { GameLogger } from '../../services/game-logger/game-logger';
   selector: 'app-game-logs',
   imports: [DatePipe],
   templateUrl: './game-logs.component.html',
-  styleUrl: './game-logs.component.css',
+  styleUrl: './game-logs.component.scss',
 })
-export class GameLogsComponent {
+export class GameLogs {
   protected readonly logs: Signal<Log[]>;
 
-  constructor(private readonly gameLogger: GameLogger) {
+  private readonly gameLogger = inject(GameLogger);
+
+  constructor() {
     this.logs = this.gameLogger.$logs;
   }
 }
