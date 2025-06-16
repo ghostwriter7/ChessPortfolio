@@ -88,10 +88,10 @@ export class GameStateStore {
     const currentSelectedPosition = this.selectedPosition();
 
     if (currentSelectedPosition) {
-      const availablePositions = getAvailablePositions(
-        this.board(),
-        currentSelectedPosition
-      );
+      const availablePositions = getAvailablePositions({
+        board: this.board(),
+        selectedPosition: currentSelectedPosition,
+      });
 
       if (availablePositions.includes(position)) {
         const makeMoveCommand = new MakeMoveCommand({

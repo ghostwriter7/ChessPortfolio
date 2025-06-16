@@ -22,9 +22,13 @@ export function getKingAvailablePositions(
       rowOffset
     );
 
-    if (
+    const isEmptyOrOccupiedByEnemyButNotKing =
       potentialPosition &&
       board[potentialPosition]?.color !== color &&
+      board[potentialPosition]?.name !== 'king';
+
+    if (
+      isEmptyOrOccupiedByEnemyButNotKing &&
       !isKingThreatened(
         movePiece(position, potentialPosition)({ ...board }),
         color

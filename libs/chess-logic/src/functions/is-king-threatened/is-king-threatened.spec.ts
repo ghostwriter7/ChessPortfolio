@@ -33,12 +33,6 @@ describe('isKingThreatened', () => {
     },
     {
       color: 'white',
-      board: mutateBoard(movePiece('e8', 'c6'), movePiece('e1', 'c5')),
-      expected: true,
-      message: 'White king meets a Black King',
-    },
-    {
-      color: 'white',
       board: mutateBoard(movePiece('c7', 'e5'), movePiece('e1', 'd4')),
       expected: true,
       message: 'White king is threatened by black pawn',

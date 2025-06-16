@@ -28,10 +28,10 @@ export class MakeMoveCommandValidator {
     const hasNoPieceAtStartPosition = startPiece === null;
     const pieceHasWrongColor = startPiece?.color !== playerColor;
     const isAttemptToCaptureOwnPiece = board[to]?.color === playerColor;
-    const pieceCannotMoveToPosition = !getAvailablePositions(
+    const pieceCannotMoveToPosition = !getAvailablePositions({
       board,
-      from
-    ).includes(to);
+      selectedPosition: from,
+    }).includes(to);
 
     return !(
       hasNoPieceAtStartPosition ||

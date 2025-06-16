@@ -10,48 +10,60 @@ import { getSlidingPieceAvailablePositions } from './sliding-piece/get-sliding-p
 
 /**
  * Determines all valid moves for a chess piece at the specified position on the board.
+ * This function handles different piece types (pawn, knight, king, and sliding pieces)
+ * and ensures moves don't put the player's own king in check when required.
  * @param board - The current state of the chess board
  * @param selectedPosition - The position of the piece to calculate moves for
+ * @param shouldCheckOwnKingSafety - When true, filters out moves that would put the player's own king in check
+ * @param includeCaptureMovesOnly - When true, returns only moves that capture opponent's pieces
  * @returns An array of valid positions where the piece can move
  */
-export function getAvailablePositions(
-  board: Board,
-  selectedPosition: Position
-): Position[] {
+export function getAvailablePositions({
+  board,
+  selectedPosition,
+  shouldCheckOwnKingSafety = true,
+  includeCaptureMovesOnly = false,
+}: {
+  board: Board;
+  selectedPosition: Position;
+  shouldCheckOwnKingSafety?: boolean;
+  includeCaptureMovesOnly?: boolean;
+}): Position[] {
   const piece = board[selectedPosition];
 
   if (!piece) return [];
 
-  if (piece.threatenedPositions) return piece.threatenedPositions;
-
   const { name, color } = piece;
 
-  const isKingSafePredicate = (position: Position) =>
-    !isKingThreatened(
-      movePiece(selectedPosition, position)({ ...board }),
-      color
-    );
+  let availablePositions: Position[] = [];
 
   if (name === 'pawn') {
-    return getPawnAvailablePositions({
+    availablePositions = getPawnAvailablePositions({
       board,
       position: selectedPosition,
-    }).filter(isKingSafePredicate);
-  }
-
-  if (isSlidingPiece(name)) {
-    return getSlidingPieceAvailablePositions(
+      isAttackOnly: includeCaptureMovesOnly,
+    });
+  } else if (isSlidingPiece(name)) {
+    availablePositions = getSlidingPieceAvailablePositions(
       board,
       name,
       selectedPosition
-    ).filter(isKingSafePredicate);
-  }
-
-  if (name === 'knight') {
-    return getKnightAvailablePositions(board, selectedPosition).filter(
-      isKingSafePredicate
     );
+  } else if (name === 'knight') {
+    availablePositions = getKnightAvailablePositions(board, selectedPosition);
+  } else {
+    return getKingAvailablePositions(board, selectedPosition);
   }
 
-  return getKingAvailablePositions(board, selectedPosition);
+  if (shouldCheckOwnKingSafety) {
+    const isKingSafePredicate = (position: Position) =>
+      !isKingThreatened(
+        movePiece(selectedPosition, position)({ ...board }),
+        color
+      );
+
+    return availablePositions.filter(isKingSafePredicate);
+  }
+
+  return availablePositions;
 }
