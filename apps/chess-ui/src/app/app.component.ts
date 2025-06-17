@@ -7,6 +7,8 @@ import {
   signal,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatButton } from '@angular/material/button';
+import { MatFormField, MatInput, MatLabel } from '@angular/material/input';
 import {
   GameEndedEvent,
   GameStartedEvent,
@@ -16,14 +18,22 @@ import {
 } from '@chess-logic';
 import { ChessBoard } from './components/chess-board/chess-board.component';
 import { GameLogs } from './components/game-logs/game-logs.component';
-import { GameStateStore } from './services/game-state-store/game-state-store';
 import { GameMediator } from './services/game-mediator/game-mediator';
+import { GameStateStore } from './services/game-state-store/game-state-store';
 import { Player } from './types/player';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  imports: [ChessBoard, ReactiveFormsModule, GameLogs],
+  imports: [
+    ChessBoard,
+    ReactiveFormsModule,
+    GameLogs,
+    MatLabel,
+    MatInput,
+    MatButton,
+    MatFormField,
+  ],
   styleUrl: './app.component.scss',
 })
 export class App implements OnInit {

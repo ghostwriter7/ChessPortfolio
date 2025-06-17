@@ -12,9 +12,13 @@
   }
 }
 
+.row-number, .column-labels {
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+}
+
 .row-number {
   align-self: center;
-  background: cornflowerblue;
   display: inline-flex;
   height: 90px;
   justify-content: center;
@@ -23,7 +27,6 @@
 }
 
 .column-labels {
-  background: cornflowerblue;
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   grid-column: 2 / span 8;
@@ -37,7 +40,7 @@
 
 .cell {
   align-items: center;
-  border: 1px solid black;
+  border: 1px solid var(--mat-sys-outline);
   display: flex;
   height: 90px;
   justify-content: center;
@@ -49,27 +52,27 @@
   }
 
   &.selectable:hover {
-    background-color: lightseagreen;
+    background-color: var(--mat-sys-secondary-container);
   }
 
   &.white {
-    background-color: lightgray;
+    background-color: var(--mat-sys-surface-container-highest);
   }
 
   &.black {
-    background-color: black;
+    background-color: var(--mat-sys-surface-container-lowest);
   }
 
   &.active {
-    background-color: lightseagreen;
+    background-color: var(--mat-sys-primary-container);
   }
 
   &.capture {
-    background-color: red;
+    background-color: var(--mat-sys-error-container);
   }
 
   &.move {
-    background-color: green;
+    background-color: var(--mat-sys-tertiary-container);
   }
 }
 
@@ -77,15 +80,17 @@
   border-radius: 4px;
   padding: 0.25rem;
 
+  &.white, &.black {
+    border: 2px solid var(--mat-sys-outline);
+    color: var(--mat-sys-on-surface);
+  }
+
   &.white {
-    background: #eeeeee;
-    border: 1px solid black;
-    color: black;
+    background: var(--mat-sys-surface-container-highest);
   }
 
   &.black {
-    background: #333333;
-    border: 1px solid lightgray;
-    color: white;
+    background: var(--mat-sys-surface-container-lowest);
+    border-color: var(--mat-sys-outline-variant);
   }
 }

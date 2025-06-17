@@ -10,11 +10,9 @@
 }
 
 header {
-  background: cornflowerblue;
+  background: var(--mat-sys-surface-container);
   border-radius: 4px;
   grid-area: header;
-  margin-block: 0.5rem;
-  padding: 1rem;
   text-align: center;
 
   h1, p {
