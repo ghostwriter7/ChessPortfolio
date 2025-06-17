@@ -1,4 +1,4 @@
-import { computed, Injectable, Signal, signal } from '@angular/core';
+import { computed, inject, Injectable, Signal, signal } from '@angular/core';
 import {
   Board,
   BoardUpdatedEvent,
@@ -24,6 +24,19 @@ export class GameStateStore {
   public readonly $opponent: Signal<Player | null>;
   public readonly $isPlayerTurn = computed(() => !!this.player()?.isTurn);
   public readonly $rows: Signal<Rows>;
+  public readonly $cellColorMap = computed<Map<Position, Color>>(() => {
+    const rows = this.rows();
+    if (!rows) return new Map();
+
+    const cellColorEntries: [Position, Color][] = rows.flatMap(
+      (row) =>
+        row.cells.map((cell) => [cell.position, cell.color]) as [
+          Position,
+          Color
+        ][]
+    );
+    return new Map<Position, Color>(cellColorEntries);
+  });
 
   private readonly rows = signal<Rows>(null);
   private readonly board = signal<Board>(UntouchedBoard);
@@ -31,8 +44,9 @@ export class GameStateStore {
   private readonly selectedPosition = signal<Position | null>(null);
   private readonly player = signal<Player | null>(null);
   private readonly opponent = signal<Player | null>(null);
+  private readonly gameMediator = inject(GameMediator);
 
-  constructor(private readonly gameMediator: GameMediator) {
+  constructor() {
     this.$rows = this.rows.asReadonly();
     this.$player = this.player.asReadonly();
     this.$opponent = this.opponent.asReadonly();

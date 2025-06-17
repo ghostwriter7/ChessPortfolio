@@ -1,4 +1,3 @@
-import { Game } from '../models/game';
 import {
   Board,
   BoardUpdatedEvent,
@@ -12,6 +11,7 @@ import {
   MakeMoveCommandPayload,
 } from '@chess-logic';
 import { Server, Socket } from 'socket.io';
+import { Game } from '../models/game';
 import { MakeMoveCommandValidator } from '../validators/make-move-command.validator';
 
 export class GameManager {
@@ -64,7 +64,7 @@ export class GameManager {
     this.io.to(gameId).emit(gameStartedEvent.name, gameStartedEvent);
 
     const logCreatedEvent = new LogCreatedEvent(
-      `The game has started! ${whiteName} (white) vs ${blackName} (black). Fight!`
+      `The game has started! ${whiteName} vs ${blackName}. Fight!`
     );
     this.io.to(gameId).emit(logCreatedEvent.name, logCreatedEvent);
 

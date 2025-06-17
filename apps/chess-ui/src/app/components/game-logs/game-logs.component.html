@@ -5,11 +5,10 @@
   <mat-card-content>
     <mat-list>
       @for (log of logs(); track $index) {
-        <mat-list-item>
-          <span matListItemTitle>{{ log.message }}</span>
-          <span matListItemLine>{{ log.timestamp | date : 'HH:mm:ss' }}</span>
+        <mat-list-item lines="2">
+          <span class="message" matListItemTitle [innerHTML]="log.message"></span>
+          <span matListItemMeta>{{ log.timestamp | date : 'HH:mm:ss' }}</span>
         </mat-list-item>
-
         @if (!$last) {
           <mat-divider/>
         }

@@ -4,9 +4,8 @@ import {
   Component,
   inject,
   Signal,
+  ViewEncapsulation,
 } from '@angular/core';
-import { Log } from '../../models/log';
-import { GameLogger } from '../../services/game-logger/game-logger';
 import {
   MatCard,
   MatCardContent,
@@ -17,11 +16,14 @@ import {
   MatDivider,
   MatList,
   MatListItem,
-  MatListItemLine,
+  MatListItemTitle,
 } from '@angular/material/list';
+import { Log } from '../../models/log';
+import { GameLogger } from '../../services/game-logger/game-logger';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   selector: 'app-game-logs',
   imports: [
     DatePipe,
@@ -31,8 +33,8 @@ import {
     MatCardContent,
     MatList,
     MatListItem,
-    MatListItemLine,
     MatDivider,
+    MatListItemTitle,
   ],
   templateUrl: './game-logs.component.html',
   styleUrl: './game-logs.component.scss',

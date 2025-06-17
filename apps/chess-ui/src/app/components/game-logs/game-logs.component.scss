@@ -1,0 +1,28 @@
+@scope (app-game-logs) {
+  :host {
+    max-width: 400px;
+  }
+
+  .message {
+    white-space: normal;
+  }
+
+  .player, .cell, .piece {
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--mat-sys-on-surface);
+  }
+
+  .white {
+    background: var(--mat-sys-surface-container-highest);
+  }
+
+  .black {
+    background: var(--mat-sys-surface-container-lowest);
+  }
+
+  .piece {
+    background: var(--mat-sys-error-container);
+    color: var(--mat-sys-error);
+  }
+}
