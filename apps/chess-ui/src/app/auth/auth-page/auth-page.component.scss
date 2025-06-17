@@ -1,0 +1,26 @@
+:host {
+  width: 100vw;
+  height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.submit-button {
+  width: 100%;
+}
+
+.container {
+  box-shadow: var(--mat-sys-level3);
+  padding: 16px;
+  width: min(95vw, 500px);
+}
+
+.form-container {
+  padding-block: 32px;
+
+  & > * {
+    width: 100%;
+  }
+}

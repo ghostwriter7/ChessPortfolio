@@ -76,11 +76,13 @@
       "unitTestRunner": "jest"
     },
     "@nx/angular:component": {
+      "style": "scss",
+      "changeDetection": "OnPush",
       "type": "component"
     },
     "@schematics/angular:component": {
       "type": "component",
-      "style": "scss",
+      "style": "scss"
     },
     "@nx/angular:directive": {
       "type": "directive"
