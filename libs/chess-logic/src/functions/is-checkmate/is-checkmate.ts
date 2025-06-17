@@ -1,8 +1,8 @@
 import { Board } from '../../types/board';
 import { Color } from '../../types/color';
 import { isKingThreatened } from '../is-king-threatened/is-king-threatened';
-import { Position } from '../../types/position';
 import { getKingAvailablePositions } from '../get-available-positions/king/get-king-available-positions';
+import { findKingPosition } from '../find-king-position/find-king-position';
 
 /**
  * Determines if the specified player's king is in checkmate position.
@@ -14,11 +14,7 @@ import { getKingAvailablePositions } from '../get-available-positions/king/get-k
  * @throws {Error} When the king of specified color is not found on the board
  */
 export function isCheckmate(board: Board, playerColor: Color): boolean {
-  const kingPosition = Object.entries(board).find(
-    ([, piece]) => piece?.color === playerColor && piece?.name === 'king'
-  )?.[0] as Position | undefined;
-
-  if (!kingPosition) throw new Error(`${playerColor} king not found on board`);
+  const kingPosition = findKingPosition(board, playerColor);
 
   return (
     isKingThreatened(board, playerColor) &&

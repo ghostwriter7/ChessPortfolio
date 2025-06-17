@@ -4,6 +4,7 @@ import { Piece } from '../../types/piece';
 import { Position } from '../../types/position';
 import { getAvailablePositions } from '../get-available-positions/get-available-positions';
 import { getOppositeColor } from '../get-opposite-color/get-opposite-color';
+import { findKingPosition } from '../find-king-position/find-king-position';
 
 /**
  * Determines if a given position could be under check from enemy pieces.
@@ -12,11 +13,7 @@ import { getOppositeColor } from '../get-opposite-color/get-opposite-color';
  * @returns True if the position is under check, false otherwise
  */
 export function isKingThreatened(board: Board, kingColor: Color): boolean {
-  const kingPosition = Object.entries(board).find(
-    ([_, piece]) => piece?.color === kingColor && piece?.name === 'king'
-  )?.[0] as Position | undefined;
-
-  if (!kingPosition) throw new Error(`${kingColor} king not found on board`);
+  const kingPosition = findKingPosition(board, kingColor);
 
   const enemyColor = getOppositeColor(kingColor);
 
