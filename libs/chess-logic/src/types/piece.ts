@@ -4,5 +4,6 @@ import { PieceName } from './piece-name';
 export type Piece = {
   name: PieceName;
   color: Color;
+  iconName: string;
   untouched: boolean;
 };

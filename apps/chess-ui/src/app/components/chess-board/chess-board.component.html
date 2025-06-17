@@ -9,7 +9,12 @@
           (click)="onCellClick(cell)"
         >
           @if (cell.occupiedBy(); as occupiedBy) {
-            <span class="figure" [ngClass]="occupiedBy.color">{{ occupiedBy.name }}</span>
+            <img
+              alt="Piece"
+              height="50"
+              width="50"
+              [ngSrc]="occupiedBy.iconName"
+            />
           }
         </div>
       }

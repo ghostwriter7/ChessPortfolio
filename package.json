@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "start:dev": "nx -t serve -p chess-ui game-service",
+    "start": "nx run-many -t serve -p chess-ui game-service",
     "start:ui": "nx serve chess-ui",
     "start:game-srv": "nx serve game-service"
   },

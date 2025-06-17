@@ -1,4 +1,4 @@
-import { NgClass } from '@angular/common';
+import { NgClass, NgOptimizedImage } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -12,7 +12,7 @@ import { Rows } from '../../types/row';
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-chess-board',
-  imports: [NgClass],
+  imports: [NgClass, NgOptimizedImage],
   templateUrl: './chess-board.component.html',
   styleUrl: './chess-board.component.scss',
 })
