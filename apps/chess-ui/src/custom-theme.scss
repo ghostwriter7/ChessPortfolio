@@ -9,9 +9,11 @@ html {
     color: (
       theme-type: color-scheme,
       primary: mat.$azure-palette,
-      tertiary: mat.$blue-palette,
+      secondary: mat.$spring-green-palette,
+      accent: mat.$cyan-palette,
+      tertiary: mat.$yellow-palette,
     ),
-    typography: Roboto,
+    typography: 'Roboto',
     density: 0,
   ));
 }
