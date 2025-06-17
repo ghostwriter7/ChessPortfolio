@@ -25,11 +25,11 @@ import {
 import { MatIcon } from '@angular/material/icon';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../services/auth/auth.service';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { nonBlankValidator } from '../../validators/non-blank/non-blank';
 import { MatInput } from '@angular/material/input';
+import { SpinnerComponent } from '../../ui/spinner/spinner.component';
 
 @Component({
   selector: 'app-auth-page',
@@ -53,8 +53,8 @@ import { MatInput } from '@angular/material/input';
     MatCardSubtitle,
     MatCardTitle,
     ReactiveFormsModule,
-    MatProgressSpinner,
     MatError,
+    SpinnerComponent,
   ],
   templateUrl: './auth-page.component.html',
   styleUrl: './auth-page.component.scss',
