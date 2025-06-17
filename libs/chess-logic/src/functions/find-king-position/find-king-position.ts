@@ -20,10 +20,9 @@ import { Position } from '../../types/position';
  * ```
  */
 export function findKingPosition(board: Board, color: Color): Position {
-  const position =
-    (Object.entries(board).find(
-      ([, piece]) => piece?.name === 'king' && piece?.color === color
-    )?.[0] as Position) || null;
+  const position = Object.entries(board).find(
+    ([, piece]) => piece?.name === 'king' && piece?.color === color
+  )?.[0] as Position | undefined;
 
   if (!position) throw new Error(`${color} king not found on board`);
 
