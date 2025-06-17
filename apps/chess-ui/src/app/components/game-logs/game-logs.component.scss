@@ -1,9 +1,15 @@
 @scope (app-game-logs) {
-  :host {
-    max-width: 400px;
+  .container {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .scrollable {
+    overflow-y: auto;
   }
 
   .message {
+    line-height: var(--mat-sys-body-large-line-height) !important;
     white-space: normal;
   }
 

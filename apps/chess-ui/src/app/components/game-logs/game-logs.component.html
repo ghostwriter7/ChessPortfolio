@@ -1,8 +1,8 @@
-<mat-card>
+<mat-card class="container">
   <mat-card-header>
     <mat-card-title class="mat-headline-6">Game Logs</mat-card-title>
   </mat-card-header>
-  <mat-card-content>
+  <mat-card-content class="scrollable">
     <mat-list>
       @for (log of logs(); track $index) {
         <mat-list-item lines="2">
