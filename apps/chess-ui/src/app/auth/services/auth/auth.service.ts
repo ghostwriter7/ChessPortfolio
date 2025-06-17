@@ -1,8 +1,11 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  public signIn(username: string): Promise<void> {
-    return Promise.resolve();
+  private readonly router = inject(Router);
+
+  public async signIn(username: string): Promise<void> {
+    this.router.navigate(['/game'], { queryParams: { username } });
   }
 }
