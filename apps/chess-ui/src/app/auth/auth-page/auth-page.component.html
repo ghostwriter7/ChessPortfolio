@@ -1,19 +1,38 @@
-  <mat-card class="container">
-    <mat-card-header>
-      <mat-card-title>Sign In Page</mat-card-title>
-      <mat-card-subtitle>Let's play some chess</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <div class="form-container">
-        <mat-form-field appearance="outline">
-          <mat-label>Nickname</mat-label>
-          <input matInput placeholder="Type your nickname, e.g. ghostwriter" />
-          <mat-icon matSuffix>person</mat-icon>
+<mat-card class="container">
+  <mat-card-header>
+    <mat-card-title>Sign In Page</mat-card-title>
+    <mat-card-subtitle>Let's play some chess</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="form-container">
+      <mat-form-field appearance="outline">
+        <mat-label>Nickname</mat-label>
+        <input matInput placeholder="Type your nickname, e.g. ghostwriter" [formControl]="usernameControl"/>
+        <mat-icon matSuffix>person</mat-icon>
+
+        @if (usernameControlError(); as error) {
+          <mat-error>{{ error }}</mat-error>
+        } @else {
           <mat-hint>Your nickname will be visible to other players</mat-hint>
-        </mat-form-field>
+        }
+      </mat-form-field>
+    </div>
+  </mat-card-content>
+  <mat-card-actions>
+    @if (isLoading()) {
+      <div class="loader">
+        <mat-spinner/>
       </div>
-    </mat-card-content>
-    <mat-card-actions>
-      <button class="submit-button" mat-raised-button color="primary">Play</button>
-    </mat-card-actions>
-  </mat-card>
+    } @else {
+      <button
+        class="submit-button"
+        mat-raised-button
+        color="primary"
+        [disabled]="isSubmitDisabled()"
+        (click)="onSubmit()"
+      >
+        Play
+      </button>
+    }
+  </mat-card-actions>
+</mat-card>
