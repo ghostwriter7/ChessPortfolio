@@ -16,13 +16,16 @@ export async function initializeDatabase(): Promise<void> {
     CREATE TABLE IF NOT EXISTS users (
       id INT AUTO_INCREMENT PRIMARY KEY,
       username VARCHAR(255) NOT NULL UNIQUE,
-      password VARCHAR(255) NOT NULL
+      password VARCHAR(255) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     )
   `;
 
   try {
     await pool.execute(createUserTableSQL);
   } catch (error) {
+    console.error('Database initialization failed:');
     console.error(error);
   }
 }
