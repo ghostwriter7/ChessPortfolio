@@ -8,6 +8,13 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
+    path: 'lobby',
+    loadComponent: () =>
+      import('./lobby/lobby-page/lobby-page.component').then(
+        (m) => m.LobbyPageComponent
+      ),
+  },
+  {
     path: 'game',
     loadComponent: () =>
       import('./game/game-page/game-page.component').then(

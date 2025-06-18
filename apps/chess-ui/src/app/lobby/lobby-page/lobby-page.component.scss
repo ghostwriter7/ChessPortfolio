@@ -1,0 +1,28 @@
+:host {
+  width: 100vw;
+  height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+header, main {
+  box-shadow: var(--mat-sys-level3);
+  padding: 16px;
+  width: min(90vw, 1200px);
+}
+
+header {
+  padding: 16px;
+}
+
+.mat-column-index {
+  width: 32px;
+}
+
+.mat-column-action {
+  width: 140px;
+}
