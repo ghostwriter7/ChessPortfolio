@@ -1,0 +1,13 @@
+services:
+  user-db:
+    image: mysql
+    container_name: user-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: userdb
+      MYSQL_USER: user-srv
+      MYSQL_PASSWORD: test
+    ports:
+      - "4500:3306"
+

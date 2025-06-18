@@ -5,7 +5,8 @@
   "scripts": {
     "start": "nx run-many -t serve -p chess-ui game-service",
     "start:ui": "nx serve chess-ui",
-    "start:game-srv": "nx serve game-service"
+    "start:game-srv": "nx serve game-service",
+    "start:user-srv": "nx serve user-service"
   },
   "private": true,
   "devDependencies": {
@@ -69,6 +70,7 @@
     "@angular/router": "20.0.3",
     "axios": "^1.6.0",
     "express": "^5.1.0",
+    "mysql2": "^3.14.1",
     "rxjs": "~7.8.0",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1"
