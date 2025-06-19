@@ -1,13 +1,15 @@
 import { Request, Router } from 'express';
-import { UserService } from './user-service';
 import pool from './database';
-import { UserRepository } from './user-repository';
-import { CreateUserRequest, SignInRequest } from './dto/user-request';
 import { AuthResponse } from './dto/auth-response';
+import { CreateUserRequest, SignInRequest } from './dto/user-request';
+import { UserService } from './services/user-service/user.service';
+import { UserRepository } from './user-repository';
+import { JwtService } from './services/jwt-service/jwt.service';
 
 const router = Router();
+const jwtService = new JwtService();
 const userRepository = new UserRepository(pool);
-const userService = new UserService(userRepository);
+const userService = new UserService(userRepository, jwtService);
 
 router.post(
   '/sign-up',

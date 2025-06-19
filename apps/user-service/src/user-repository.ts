@@ -16,7 +16,7 @@ export class UserRepository {
     return (row as ResultSetHeader).insertId;
   }
 
-  public async findUserByUsername(username: string): Promise<User> {
+  public async findUserByUsername(username: string): Promise<User | null> {
     const sql = `SELECT *
                  FROM users
                  WHERE username = ?`;
@@ -30,6 +30,10 @@ export class UserRepository {
 
     const [user] = rows;
 
-    return new User(user.id, user.username, user.password);
+    if (user) {
+      return new User(user.id, user.username, user.password);
+    }
+
+    return null;
   }
 }

@@ -1,15 +1,16 @@
-import * as jwt from 'jsonwebtoken';
-import { CreateUserRequest, SignInRequest } from './dto/user-request';
-import { BadRequest } from './exceptions/bad-request';
-import { Unauthorized } from './exceptions/unauthorized';
-import { PasswordHelper } from './helpers/password.helper';
-import { UserRepository } from './user-repository';
-import { AuthResponse } from './dto/auth-response';
-
-const JWT_SECRET = 'temp-secret-for-dev-work';
+import { CreateUserRequest, SignInRequest } from '../../dto/user-request';
+import { BadRequest } from '../../exceptions/bad-request';
+import { Unauthorized } from '../../exceptions/unauthorized';
+import { PasswordHelper } from '../../helpers/password.helper';
+import { UserRepository } from '../../user-repository';
+import { AuthResponse } from '../../dto/auth-response';
+import { JwtService } from '../jwt-service/jwt.service';
 
 export class UserService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly jwtService: JwtService
+  ) {}
 
   public async signUp(
     createUserRequest: CreateUserRequest
@@ -22,7 +23,7 @@ export class UserService {
         username,
         passwordHash
       );
-      const token = this.generateToken(userId);
+      const token = this.jwtService.generateToken({ id: userId });
       return new AuthResponse(token);
     } catch (e) {
       throw new BadRequest('Username already exists', e);
@@ -47,12 +48,8 @@ export class UserService {
       throw new Unauthorized();
     }
 
-    const token = this.generateToken(user.id);
+    const token = this.jwtService.generateToken({ id: user.id });
 
     return new AuthResponse(token);
-  }
-
-  private generateToken(userId: number): string {
-    return jwt.sign({ id: userId }, JWT_SECRET, { expiresIn: '24h' });
   }
 }
