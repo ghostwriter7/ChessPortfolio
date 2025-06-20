@@ -4,6 +4,7 @@ import { FormFieldComponent } from '../../../ui/form-field/form-field.component'
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { nonBlankValidator } from '../../../validators/non-blank/non-blank';
 import { BaseForm } from '../base-form';
+import { passwordValidator } from '../../validators/password/password.validator';
 
 @Component({
   selector: 'app-sign-up-form',
@@ -25,8 +26,7 @@ export class SignUpFormComponent extends BaseForm {
     ]),
     password: new FormControl<string | null>(null, [
       Validators.required,
-      nonBlankValidator,
-      Validators.minLength(6),
+      passwordValidator,
     ]),
   });
 
