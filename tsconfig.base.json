@@ -15,6 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@api": ["libs/api/src/index.ts"],
       "@chess-logic": ["libs/chess-logic/src/index.ts"]
     }
   },

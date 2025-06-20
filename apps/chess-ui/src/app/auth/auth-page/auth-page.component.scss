@@ -17,10 +17,14 @@
   width: min(95vw, 500px);
 }
 
-.form-container {
-  padding-block: 32px;
+.message {
+  font: var(--mat-sys-body-medium);
+  text-align: end;
+}
 
-  & > * {
-    width: 100%;
-  }
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-block: 32px;
 }

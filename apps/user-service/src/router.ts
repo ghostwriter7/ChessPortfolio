@@ -1,7 +1,6 @@
+import { AuthResponse, CreateUserRequest, SignInRequest } from '@api';
 import { Request, Router } from 'express';
 import pool from './database';
-import { AuthResponse } from './dto/auth-response';
-import { CreateUserRequest, SignInRequest } from './dto/user-request';
 import { UserService } from './services/user-service/user.service';
 import { UserRepository } from './user-repository';
 import { JwtService } from './services/jwt-service/jwt.service';

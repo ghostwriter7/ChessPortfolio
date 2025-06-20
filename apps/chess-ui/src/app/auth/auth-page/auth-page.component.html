@@ -1,31 +1,26 @@
 <mat-card class="container">
   <mat-card-header>
-    <mat-card-title>Sign In Page</mat-card-title>
+    <mat-card-title>{{ label() }}</mat-card-title>
     <mat-card-subtitle>Let's play some chess</mat-card-subtitle>
   </mat-card-header>
   <mat-card-content>
-    <div class="form-container">
-      <mat-form-field appearance="outline">
-        <mat-label>Nickname</mat-label>
-        <input
-          matInput
-          placeholder="Type your nickname, e.g. ghostwriter"
-          [formControl]="usernameControl"
-          (keyup.enter)="onSubmit()"
-        />
-        <mat-icon matSuffix>person</mat-icon>
+    @if (isSignIn()) {
+      <app-sign-in-form class="form-container" #form />
+      <p class="message">Don't you have an account yet?
+        <button matButton (click)="toggleMode()">Register</button>
+      </p>
+    } @else {
+      <app-sign-up-form class="form-container" #form/>
+      <p class="message">Already have an account?
+        <button matButton (click)="toggleMode()">Sign In</button>
+      </p>
+    }
 
-        @if (usernameControlError(); as error) {
-          <mat-error>{{ error }}</mat-error>
-        } @else {
-          <mat-hint>Your nickname will be visible to other players</mat-hint>
-        }
-      </mat-form-field>
-    </div>
+
   </mat-card-content>
   <mat-card-actions>
     @if (isLoading()) {
-     <app-spinner />
+      <app-spinner/>
     } @else {
       <button
         class="submit-button"
@@ -34,7 +29,7 @@
         [disabled]="isSubmitDisabled()"
         (click)="onSubmit()"
       >
-        Play
+        {{ label() }}
       </button>
     }
   </mat-card-actions>

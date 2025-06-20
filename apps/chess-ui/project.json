@@ -55,6 +55,9 @@
     },
     "serve": {
       "continuous": true,
+      "options": {
+        "proxyConfig": "./apps/chess-ui/proxy.conf.json"
+      },
       "executor": "@angular-devkit/build-angular:dev-server",
       "configurations": {
         "production": {

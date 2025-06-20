@@ -1,9 +1,9 @@
-import { CreateUserRequest, SignInRequest } from '../../dto/user-request';
+import { CreateUserRequest, SignInRequest } from '@api';
 import { BadRequest } from '../../exceptions/bad-request';
 import { Unauthorized } from '../../exceptions/unauthorized';
 import { PasswordHelper } from '../../helpers/password.helper';
 import { UserRepository } from '../../user-repository';
-import { AuthResponse } from '../../dto/auth-response';
+import { AuthResponse } from '@api';
 import { JwtService } from '../jwt-service/jwt.service';
 
 export class UserService {

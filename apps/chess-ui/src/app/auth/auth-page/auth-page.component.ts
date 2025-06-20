@@ -1,11 +1,14 @@
+import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MatButton } from '@angular/material/button';
 import {
   MatCard,
   MatCardActions,
@@ -14,22 +17,11 @@ import {
   MatCardSubtitle,
   MatCardTitle,
 } from '@angular/material/card';
-import { MatButton } from '@angular/material/button';
-import {
-  MatError,
-  MatFormField,
-  MatHint,
-  MatLabel,
-  MatSuffix,
-} from '@angular/material/form-field';
-import { MatIcon } from '@angular/material/icon';
-import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthService } from '../services/auth/auth.service';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
-import { nonBlankValidator } from '../../validators/non-blank/non-blank';
-import { MatInput } from '@angular/material/input';
 import { SpinnerComponent } from '../../ui/spinner/spinner.component';
+import { AuthService } from '../services/auth/auth.service';
+import { SignInFormComponent } from '../form/sign-in-form/sign-in-form.component';
+import { SignUpFormComponent } from '../form/sign-up-form/sign-up-form.component';
+import { BaseForm } from '../form/base-form';
 
 @Component({
   selector: 'app-auth-page',
@@ -40,63 +32,46 @@ import { SpinnerComponent } from '../../ui/spinner/spinner.component';
     MatCardContent,
     MatCardActions,
     MatButton,
-    MatFormField,
-    MatFormField,
-    MatFormField,
-    MatLabel,
-    MatInput,
-    MatSuffix,
-    MatIcon,
-    MatLabel,
-    MatFormField,
-    MatHint,
     MatCardSubtitle,
     MatCardTitle,
     ReactiveFormsModule,
-    MatError,
     SpinnerComponent,
+    SignInFormComponent,
+    SignUpFormComponent,
   ],
   templateUrl: './auth-page.component.html',
   styleUrl: './auth-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuthPageComponent {
+  protected readonly label = computed(() =>
+    this.isSignIn() ? 'Sign In' : 'Sign Up'
+  );
+  protected readonly isSignIn = computed(() => this.mode() === 'signIn');
   protected readonly isLoading = signal(false);
   protected readonly isSubmitDisabled = computed(
-    () => this.isLoading() || this.isControlInvalid()
+    () => this.isLoading() || this.form()?.isInvalid()
   );
-  protected readonly usernameControl = new FormControl<string | null>(null, [
-    Validators.required,
-    nonBlankValidator,
-  ]);
-  protected readonly usernameControlError = computed(() => {
-    if (this.isControlInvalid()) {
-      if (this.usernameControl.hasError('required')) {
-        return 'Username is required';
-      }
-
-      if (this.usernameControl.hasError('nonBlank')) {
-        return 'Username cannot be blank';
-      }
-    }
-    return null;
-  });
 
   private readonly authService = inject(AuthService);
-  private readonly isControlInvalid = toSignal(
-    this.usernameControl.events.pipe(map(() => this.usernameControl.invalid))
-  );
+  private readonly form = viewChild<BaseForm>('form');
+  private readonly mode = signal<'signIn' | 'signUp'>('signIn');
 
   protected onSubmit(): void {
-    const username = this.usernameControl.value?.trim();
+    const form = this.form();
 
-    if (username) {
+    if (form && !form.isInvalid()) {
+      const value = form.getValue();
+
       this.isLoading.set(true);
 
-      this.authService.signIn(username);
-    } else {
-      this.usernameControl.updateValueAndValidity();
-      this.usernameControl.markAsTouched();
+      // const request$ = this.isSignIn()
+      // ? this.authService.signIn()
+      //   : this.authService.signUp()
     }
+  }
+
+  protected toggleMode(): void {
+    this.mode.update((mode) => (mode === 'signIn' ? 'signUp' : 'signIn'));
   }
 }

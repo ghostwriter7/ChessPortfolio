@@ -1,0 +1,18 @@
+<app-form-field
+  hint="Your username will be visible to other players"
+  label="Username"
+  placeholder="Type your username here, e.g. ghostwriter"
+  [control]="formGroup.controls.username"
+/>
+<app-form-field
+  hint="Your email will be used for account's activation"
+  label="Email"
+  placeholder="Type your email here, e.g. johnny.wick@outlook.com"
+  [control]="formGroup.controls.email"
+/>
+<app-form-field
+  hint="Password needs to be at least 6 characters long and contain lowercase, uppercase and numbers"
+  label="Password"
+  type="password"
+  [control]="formGroup.controls.password"
+/>
