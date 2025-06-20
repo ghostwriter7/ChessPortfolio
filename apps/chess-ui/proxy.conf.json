@@ -1,6 +1,6 @@
 {
   "/api/auth": {
-    "target": "http://localhost:3333",
+    "target": "http://localhost:4201",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"

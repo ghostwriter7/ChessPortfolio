@@ -17,11 +17,14 @@ import {
   MatCardSubtitle,
   MatCardTitle,
 } from '@angular/material/card';
+import { catchError, EMPTY, finalize } from 'rxjs';
 import { SpinnerComponent } from '../../ui/spinner/spinner.component';
+import { SignInFormValue, SignUpFormValue } from '../model/form';
 import { AuthService } from '../services/auth/auth.service';
 import { SignInFormComponent } from '../form/sign-in-form/sign-in-form.component';
 import { SignUpFormComponent } from '../form/sign-up-form/sign-up-form.component';
 import { BaseForm } from '../form/base-form';
+import { MatError } from '@angular/material/input';
 
 @Component({
   selector: 'app-auth-page',
@@ -38,12 +41,14 @@ import { BaseForm } from '../form/base-form';
     SpinnerComponent,
     SignInFormComponent,
     SignUpFormComponent,
+    MatError,
   ],
   templateUrl: './auth-page.component.html',
   styleUrl: './auth-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuthPageComponent {
+  protected readonly error = signal<string | null>(null);
   protected readonly label = computed(() =>
     this.isSignIn() ? 'Sign In' : 'Sign Up'
   );
@@ -61,13 +66,20 @@ export class AuthPageComponent {
     const form = this.form();
 
     if (form && !form.isInvalid()) {
-      const value = form.getValue();
-
       this.isLoading.set(true);
 
-      // const request$ = this.isSignIn()
-      // ? this.authService.signIn()
-      //   : this.authService.signUp()
+      (this.isSignIn()
+        ? this.authService.signIn(form.getValue<SignInFormValue>())
+        : this.authService.signUp(form.getValue<SignUpFormValue>())
+      )
+        .pipe(
+          catchError((err) => {
+            this.error.set(err?.message || err);
+            return EMPTY;
+          }),
+          finalize(() => this.isLoading.set(false))
+        )
+        .subscribe();
     }
   }
 

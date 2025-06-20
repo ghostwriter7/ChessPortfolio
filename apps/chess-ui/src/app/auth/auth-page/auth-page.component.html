@@ -16,6 +16,9 @@
       </p>
     }
 
+    @if (error(); as error) {
+      <mat-error>{{ error }}</mat-error>
+    }
 
   </mat-card-content>
   <mat-card-actions>
