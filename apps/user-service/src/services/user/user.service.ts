@@ -1,19 +1,25 @@
-import { CreateUserRequest, SignInRequest } from '@api';
+import {
+  CreateUserRequest,
+  EMAIL_NOTIFICATION_REQUESTED,
+  SignInRequest,
+} from '@api';
 import { BadRequestException } from '../../exceptions/bad-request-exception';
 import { UnauthorizedException } from '../../exceptions/unauthorized-exception';
 import { PasswordHelper } from '../../helpers/password.helper';
 import { UserRepository } from '../../user-repository';
-import { JwtService } from '../jwt-service/jwt.service';
+import { JwtService } from '../jwt/jwt.service';
 import { TokensWithUsername } from '../../dtos/tokens';
 import { TokenPayload } from '../../dtos/token-payload';
 import { SqlException } from '../../exceptions/sql-exception';
 import { InternalServerException } from '../../exceptions/internal-server-exception';
 import { ForbiddenException } from '../../exceptions/forbidden-exception';
+import { BrokerService } from '../broker/broker.service';
 
 export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private readonly brokerService: BrokerService
   ) {}
 
   public async signUp(createUserRequest: CreateUserRequest): Promise<number> {
@@ -21,11 +27,34 @@ export class UserService {
 
     const passwordHash = PasswordHelper.hashPassword(password);
     try {
-      return await this.userRepository.createUser(
+      const userId = await this.userRepository.createUser(
         username,
         email,
         passwordHash
       );
+
+      const verificationToken = this.jwtService.generateToken(
+        {
+          userId,
+          type: 'verification',
+        },
+        '2d'
+      );
+
+      await this.brokerService.send(
+        EMAIL_NOTIFICATION_REQUESTED,
+        userId.toString(),
+        {
+          email,
+          message: `
+          Welcome to Chess Portfolio.
+          Please click on the link below to verify your email address.
+          <a href="http://localhost:4201/api/auth/verify/${verificationToken}">Verify email</a>
+          `,
+        }
+      );
+
+      return userId;
     } catch (e) {
       if (
         e instanceof SqlException &&
