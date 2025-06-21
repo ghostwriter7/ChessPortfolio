@@ -75,4 +75,12 @@ router.get('/refresh', async (req, res) => {
   }
 });
 
+router.get('/logout', (req, res) => {
+  console.log('[GET] /logout');
+  res
+    .status(204)
+    .clearCookie('refreshToken', { httpOnly: true })
+    .sendStatus(204);
+});
+
 export default router;

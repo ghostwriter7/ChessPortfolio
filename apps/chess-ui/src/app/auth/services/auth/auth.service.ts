@@ -24,6 +24,14 @@ export class AuthService {
     this.attemptToRefreshToken();
   }
 
+  public logout(): void {
+    this.authResponse = null;
+    this.httpClient
+      .get(`${this.api}/logout`, { withCredentials: true })
+      .subscribe();
+    this.router.navigate(['/auth']);
+  }
+
   public signUp(value: SignUpFormValue): Observable<AuthResponse> {
     return this.httpClient
       .post<AuthResponse>(`${this.api}/sign-up`, value, {
