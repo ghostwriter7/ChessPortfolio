@@ -1,10 +1,12 @@
-import express from 'express';
-import router from './router';
-import { initializeDatabase } from './database';
-import cors from 'cors';
-import { BadRequestException } from './exceptions/bad-request-exception';
-import { UnauthorizedException } from './exceptions/unauthorized-exception';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
+import express from 'express';
+import * as jwt from 'jsonwebtoken';
+import { initializeDatabase } from './database';
+import { BadRequestException } from './exceptions/bad-request-exception';
+import { InternalServerException } from './exceptions/internal-server-exception';
+import { UnauthorizedException } from './exceptions/unauthorized-exception';
+import router from './router';
 
 const app = express();
 
@@ -17,8 +19,14 @@ app.use('/api/auth', router);
 app.use((err: Error, req, res, next) => {
   if (err instanceof BadRequestException) {
     res.status(400).json({ message: err.message });
-  } else if (err instanceof UnauthorizedException) {
+  } else if (
+    err instanceof UnauthorizedException ||
+    err instanceof jwt.TokenExpiredError ||
+    err instanceof jwt.JsonWebTokenError
+  ) {
     res.status(401).json({ message: err.message });
+  } else if (err instanceof InternalServerException) {
+    res.status(500).json({ message: err.message });
   } else {
     res.status(500).json({ message: 'Internal server error' });
   }

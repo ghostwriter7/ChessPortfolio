@@ -1,30 +1,43 @@
-import { AuthResponse, CreateUserRequest, SignInRequest } from '@api';
+import { CreateUserRequest, SignInRequest } from '@api';
 import { PasswordHelper } from '../../helpers/password.helper';
 import { UserService } from './user.service';
 import { UserRepository } from '../../user-repository';
 import { JwtService } from '../jwt-service/jwt.service';
 import { BadRequestException } from '../../exceptions/bad-request-exception';
 import { UnauthorizedException } from '../../exceptions/unauthorized-exception';
+import { User } from '../../model/user';
+import * as jwt from 'jsonwebtoken';
+import { SqlException } from '../../exceptions/sql-exception';
 
 describe('UserService', () => {
   let userService: UserService;
   let userRepository: {
     createUser: jest.SpyInstance;
     findUserByUsername: jest.SpyInstance;
+    findUserById: jest.SpyInstance;
   };
-  let jwtService: { generateToken: jest.SpyInstance };
+  let jwtService: {
+    generateAuthTokens: jest.SpyInstance;
+    verifyToken: jest.SpyInstance;
+  };
 
   beforeEach(() => {
-    jwtService = { generateToken: jest.fn() };
-    userRepository = { createUser: jest.fn(), findUserByUsername: jest.fn() };
+    jwtService = { generateAuthTokens: jest.fn(), verifyToken: jest.fn() };
+    userRepository = {
+      createUser: jest.fn(),
+      findUserByUsername: jest.fn(),
+      findUserById: jest.fn(),
+    };
     userService = new UserService(
       userRepository as unknown as UserRepository,
       jwtService as unknown as JwtService
     );
   });
 
+  const tokens = { accessToken: 'access token', refreshToken: 'refresh token' };
+
   describe('signUp', () => {
-    it('should save user and generate a JsonWebToken', async () => {
+    it('should save user and generate access and refresh tokens', async () => {
       const createUserRequest: CreateUserRequest = {
         password: 'test123',
         username: 'NewUser',
@@ -34,18 +47,18 @@ describe('UserService', () => {
       const hashPasswordSpy = jest
         .spyOn(PasswordHelper, 'hashPassword')
         .mockReturnValue(hashedPassword);
-      const dummyToken = 'dummy token';
-      jwtService.generateToken.mockReturnValue(dummyToken);
+
+      jwtService.generateAuthTokens.mockReturnValue(tokens);
       userRepository.createUser.mockReturnValue(userId);
 
-      const authResponse = await userService.signUp(createUserRequest);
+      const response = await userService.signUp(createUserRequest);
 
       expect(hashPasswordSpy).toHaveBeenCalledWith(createUserRequest.password);
       expect(userRepository.createUser).toHaveBeenCalledWith(
         createUserRequest.username,
         hashedPassword
       );
-      expect(authResponse).toEqual(new AuthResponse(dummyToken));
+      expect(response).toEqual(tokens);
     });
 
     it('should throw an error when username already exists', async () => {
@@ -53,11 +66,12 @@ describe('UserService', () => {
         password: 'test123',
         username: 'NewUser',
       };
-      const error = new Error();
-      userRepository.createUser.mockRejectedValue(error);
+      userRepository.createUser.mockImplementation(() => {
+        throw new SqlException('duplicate', SqlException.UNIQUE_VIOLATION);
+      });
 
       await expect(userService.signUp(createUserRequest)).rejects.toThrow(
-        new BadRequestException('Username already exists', error)
+        new BadRequestException('Username already exists')
       );
     });
   });
@@ -77,7 +91,7 @@ describe('UserService', () => {
         signInRequest.username
       );
       expect(userRepository.findUserByUsername).toHaveBeenCalledTimes(1);
-      expect(jwtService.generateToken).not.toHaveBeenCalled();
+      expect(jwtService.generateAuthTokens).not.toHaveBeenCalled();
     });
 
     it('should throw an exception when the password is incorrect', async () => {
@@ -97,24 +111,68 @@ describe('UserService', () => {
         signInRequest.password,
         '<HASH>'
       );
-      expect(jwtService.generateToken).not.toHaveBeenCalled();
+      expect(jwtService.generateAuthTokens).not.toHaveBeenCalled();
     });
 
-    it('should return a JsonWebToken when the user exists and the password is correct', async () => {
+    it('should return access and refresh tokens when the user exists and the password is correct', async () => {
       const userId = 1;
       userRepository.findUserByUsername.mockResolvedValue({
         id: userId,
         passwordHash: '<HASH>',
       });
       jest.spyOn(PasswordHelper, 'verifyPassword').mockReturnValue(true);
-      const dummyToken = 'dummy token';
-      jwtService.generateToken.mockReturnValue(dummyToken);
+      jwtService.generateAuthTokens.mockReturnValue(tokens);
 
-      const authResponse = await userService.signIn(signInRequest);
+      const response = await userService.signIn(signInRequest);
 
-      expect(authResponse).toEqual(new AuthResponse(dummyToken));
-      expect(jwtService.generateToken).toHaveBeenCalledWith({ id: userId });
-      expect(jwtService.generateToken).toHaveBeenCalledTimes(1);
+      expect(response).toEqual(tokens);
+      expect(jwtService.generateAuthTokens).toHaveBeenCalledWith(userId);
+      expect(jwtService.generateAuthTokens).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('refreshTokens', () => {
+    const token = 'access token';
+    const userId = 100;
+
+    it('should generate access and refresh tokens when the refresh token is valid', async () => {
+      jwtService.verifyToken.mockReturnValue({ userId: userId });
+      userRepository.findUserById.mockReturnValue(
+        new User(userId, 'test', 'test')
+      );
+      jwtService.generateAuthTokens.mockReturnValue(tokens);
+
+      const response = await userService.refreshTokens(token);
+
+      expect(jwtService.verifyToken).toHaveBeenCalledWith(token);
+      expect(userRepository.findUserById).toHaveBeenCalledWith(userId);
+      expect(jwtService.generateAuthTokens).toHaveBeenCalledWith(userId);
+      expect(response).toEqual(tokens);
+    });
+
+    it('should throw an exception when the token is invalid', async () => {
+      jwtService.verifyToken.mockImplementation(() => {
+        throw new jwt.JsonWebTokenError('any error');
+      });
+
+      await expect(userService.refreshTokens(token)).rejects.toThrow(
+        new jwt.JsonWebTokenError('any error')
+      );
+
+      expect(userRepository.findUserById).not.toHaveBeenCalled();
+      expect(jwtService.generateAuthTokens).not.toHaveBeenCalled();
+    });
+
+    it('should throw an exception when the user is not found', async () => {
+      jwtService.verifyToken.mockReturnValue({ userId });
+      userRepository.findUserById.mockReturnValue(null);
+
+      await expect(userService.refreshTokens(token)).rejects.toThrow(
+        new BadRequestException(`User ${userId} not found`)
+      );
+
+      expect(userRepository.findUserById).toHaveBeenCalledWith(userId);
+      expect(jwtService.generateAuthTokens).not.toHaveBeenCalled();
     });
   });
 });

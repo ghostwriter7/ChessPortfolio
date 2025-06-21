@@ -6,6 +6,8 @@ import { UserRepository } from '../../user-repository';
 import { JwtService } from '../jwt-service/jwt.service';
 import { Tokens } from '../../dtos/tokens';
 import { TokenPayload } from '../../dtos/token-payload';
+import { SqlException } from '../../exceptions/sql-exception';
+import { InternalServerException } from '../../exceptions/internal-server-exception';
 
 export class UserService {
   constructor(
@@ -26,7 +28,13 @@ export class UserService {
       console.log('User successfully created');
       return tokens;
     } catch (e) {
-      throw new BadRequestException('Username already exists', e);
+      if (
+        e instanceof SqlException &&
+        e.code === SqlException.UNIQUE_VIOLATION
+      ) {
+        throw new BadRequestException('Username already exists');
+      }
+      throw new InternalServerException();
     }
   }
 

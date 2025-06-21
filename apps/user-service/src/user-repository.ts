@@ -1,6 +1,7 @@
 import { Pool, RowDataPacket } from 'mysql2/promise';
 import { User } from './model/user';
 import { ResultSetHeader } from 'mysql2/typings/mysql/lib/protocol/packets/ResultSetHeader';
+import { SqlException } from './exceptions/sql-exception';
 
 export class UserRepository {
   constructor(private readonly pool: Pool) {}
@@ -12,8 +13,16 @@ export class UserRepository {
     const sql = `INSERT INTO users (username, password)
                  VALUES (?, ?)`;
 
-    const [row] = await this.pool.execute(sql, [username, passwordHash]);
-    return (row as ResultSetHeader).insertId;
+    try {
+      const [row] = await this.pool.execute(sql, [username, passwordHash]);
+      return (row as ResultSetHeader).insertId;
+    } catch (e) {
+      const exceptionCode =
+        e.code === 'ER_DUP_ENTRY'
+          ? SqlException.UNIQUE_VIOLATION
+          : SqlException.UNKNOWN_ERROR;
+      throw new SqlException(e.message, exceptionCode);
+    }
   }
 
   public async findUserByUsername(username: string): Promise<User | null> {
