@@ -14,6 +14,7 @@ import { SqlException } from '../../exceptions/sql-exception';
 import { InternalServerException } from '../../exceptions/internal-server-exception';
 import { ForbiddenException } from '../../exceptions/forbidden-exception';
 import { BrokerService } from '../broker/broker.service';
+import { User } from '../../model/user';
 
 export class UserService {
   constructor(
@@ -73,20 +74,10 @@ export class UserService {
 
     const user = await this.userRepository.findUserByUsernameOrEmail(username);
 
-    if (!user) {
-      throw new BadRequestException(`User ${username} not found`);
-    }
+    this.verifyUserExists(user, username);
+    this.verifyUserIsActive(user);
 
-    if (!user.active) {
-      throw new ForbiddenException('User is not active');
-    }
-
-    const isValidPassword = PasswordHelper.verifyPassword(
-      password,
-      user.passwordHash
-    );
-
-    if (!isValidPassword) {
+    if (!PasswordHelper.verifyPassword(password, user.passwordHash)) {
       throw new UnauthorizedException();
     }
 
@@ -102,13 +93,8 @@ export class UserService {
 
     const user = await this.userRepository.findUserById(userId);
 
-    if (!user) {
-      throw new BadRequestException(`User ${userId} not found`);
-    }
-
-    if (!user.active) {
-      throw new ForbiddenException('User is not active');
-    }
+    this.verifyUserExists(user, userId);
+    this.verifyUserIsActive(user);
 
     const tokens = this.jwtService.generateAuthTokens(user.id);
     console.log(`Tokens refreshed for ${user.username}`);
@@ -124,14 +110,30 @@ export class UserService {
 
     const user = await this.userRepository.findUserById(userId);
 
-    if (!user) {
-      throw new BadRequestException(`User ${userId} not found`);
-    }
-
-    if (user.active) {
-      throw new BadRequestException('User is already active');
-    }
+    this.verifyUserExists(user, userId);
+    this.verifyUserIsInactive(user);
 
     return this.userRepository.activateUser(userId);
+  }
+
+  private verifyUserExists(
+    user: User | null,
+    identifier: string | number
+  ): void {
+    if (!user) {
+      throw new BadRequestException(`User ${identifier} not found`);
+    }
+  }
+
+  private verifyUserIsActive(user: User): void {
+    if (!user.active) {
+      throw new ForbiddenException('User is not active');
+    }
+  }
+
+  private verifyUserIsInactive(user: User): void {
+    if (user.active) {
+      throw new ForbiddenException('User is already active');
+    }
   }
 }
