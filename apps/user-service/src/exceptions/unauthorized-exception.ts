@@ -1,4 +1,4 @@
-export class Unauthorized extends Error {
+export class UnauthorizedException extends Error {
   constructor(message = 'Invalid credentials') {
     super(message);
   }

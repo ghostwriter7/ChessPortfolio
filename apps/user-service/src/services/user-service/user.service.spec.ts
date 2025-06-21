@@ -1,11 +1,10 @@
-import { CreateUserRequest, SignInRequest } from '@api';
+import { AuthResponse, CreateUserRequest, SignInRequest } from '@api';
 import { PasswordHelper } from '../../helpers/password.helper';
 import { UserService } from './user.service';
 import { UserRepository } from '../../user-repository';
-import { AuthResponse } from '@api';
 import { JwtService } from '../jwt-service/jwt.service';
-import { BadRequest } from '../../exceptions/bad-request';
-import { Unauthorized } from '../../exceptions/unauthorized';
+import { BadRequestException } from '../../exceptions/bad-request-exception';
+import { UnauthorizedException } from '../../exceptions/unauthorized-exception';
 
 describe('UserService', () => {
   let userService: UserService;
@@ -58,7 +57,7 @@ describe('UserService', () => {
       userRepository.createUser.mockRejectedValue(error);
 
       await expect(userService.signUp(createUserRequest)).rejects.toThrow(
-        new BadRequest('Username already exists', error)
+        new BadRequestException('Username already exists', error)
       );
     });
   });
@@ -71,7 +70,7 @@ describe('UserService', () => {
 
     it('should throw an exception when the user does not exist', async () => {
       await expect(userService.signIn(signInRequest)).rejects.toThrow(
-        new BadRequest(`User ${signInRequest.username} not found`)
+        new BadRequestException(`User ${signInRequest.username} not found`)
       );
 
       expect(userRepository.findUserByUsername).toHaveBeenCalledWith(
@@ -91,7 +90,7 @@ describe('UserService', () => {
         .mockReturnValue(false);
 
       await expect(userService.signIn(signInRequest)).rejects.toThrow(
-        new Unauthorized()
+        new UnauthorizedException()
       );
 
       expect(verifyPasswordSpy).toHaveBeenCalledWith(

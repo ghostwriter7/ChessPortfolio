@@ -36,4 +36,25 @@ export class UserRepository {
 
     return null;
   }
+
+  public async findUserById(userId: number): Promise<User | null> {
+    const sql = `SELECT *
+                 FROM users
+                 WHERE id = ?`;
+
+    const [queryResult] = await this.pool.execute(sql, [userId]);
+
+    const rows = queryResult as RowDataPacket[];
+
+    if (rows.length > 1)
+      throw new Error('Query did not return a single result');
+
+    const [user] = rows;
+
+    if (user) {
+      return new User(user.id, user.username, user.password);
+    }
+
+    return null;
+  }
 }

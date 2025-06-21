@@ -10,6 +10,7 @@ import { AuthResponse } from '@api';
 export class AuthService {
   public readonly $user: Signal<User | null>;
   private readonly router = inject(Router);
+  private readonly refreshTokenInMs = 1000 * 55;
 
   private authResponse: AuthResponse | null = null;
 
@@ -19,11 +20,15 @@ export class AuthService {
 
   constructor() {
     this.$user = this.user.asReadonly();
+
+    this.attemptToRefreshToken();
   }
 
   public signUp(value: SignUpFormValue): Observable<AuthResponse> {
     return this.httpClient
-      .post<AuthResponse>(`${this.api}/sign-up`, value)
+      .post<AuthResponse>(`${this.api}/sign-up`, value, {
+        withCredentials: true,
+      })
       .pipe(
         tap(this.handleAuthResponse.bind(this)),
         catchError(this.handleError.bind(this))
@@ -32,16 +37,26 @@ export class AuthService {
 
   public signIn(value: SignInFormValue): Observable<AuthResponse> {
     return this.httpClient
-      .post<AuthResponse>(`${this.api}/sign-in`, value)
+      .post<AuthResponse>(`${this.api}/sign-in`, value, {
+        withCredentials: true,
+      })
       .pipe(
         tap(this.handleAuthResponse.bind(this)),
         catchError(this.handleError.bind(this))
       );
   }
 
-  private handleAuthResponse(authResponse: AuthResponse): void {
+  private handleAuthResponse(
+    authResponse: AuthResponse,
+    navigateToLobby = true
+  ): void {
     this.authResponse = authResponse;
-    this.router.navigate(['/lobby']);
+
+    setTimeout(() => this.attemptToRefreshToken(false), this.refreshTokenInMs);
+
+    if (navigateToLobby) {
+      this.router.navigate(['/lobby']);
+    }
   }
 
   private handleError(
@@ -51,5 +66,15 @@ export class AuthService {
       throw new Error(error.error.message);
     }
     throw new Error(error.message);
+  }
+
+  private attemptToRefreshToken(navigateToLobby = true): void {
+    this.httpClient
+      .get<AuthResponse>(`${this.api}/refresh`, { withCredentials: true })
+      .subscribe({
+        next: (authResponse: AuthResponse) =>
+          this.handleAuthResponse(authResponse, navigateToLobby),
+        error: () => this.router.navigate(['/auth']),
+      });
   }
 }
