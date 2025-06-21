@@ -58,7 +58,10 @@ describe('UserService', () => {
         createUserRequest.username,
         hashedPassword
       );
-      expect(response).toEqual(tokens);
+      expect(response).toEqual({
+        ...tokens,
+        username: createUserRequest.username,
+      });
     });
 
     it('should throw an error when username already exists', async () => {
@@ -118,6 +121,7 @@ describe('UserService', () => {
       const userId = 1;
       userRepository.findUserByUsername.mockResolvedValue({
         id: userId,
+        username: signInRequest.username,
         passwordHash: '<HASH>',
       });
       jest.spyOn(PasswordHelper, 'verifyPassword').mockReturnValue(true);
@@ -125,7 +129,7 @@ describe('UserService', () => {
 
       const response = await userService.signIn(signInRequest);
 
-      expect(response).toEqual(tokens);
+      expect(response).toEqual({ ...tokens, username: signInRequest.username });
       expect(jwtService.generateAuthTokens).toHaveBeenCalledWith(userId);
       expect(jwtService.generateAuthTokens).toHaveBeenCalledTimes(1);
     });
@@ -147,7 +151,7 @@ describe('UserService', () => {
       expect(jwtService.verifyToken).toHaveBeenCalledWith(token);
       expect(userRepository.findUserById).toHaveBeenCalledWith(userId);
       expect(jwtService.generateAuthTokens).toHaveBeenCalledWith(userId);
-      expect(response).toEqual(tokens);
+      expect(response).toEqual({ ...tokens, username: 'test' });
     });
 
     it('should throw an exception when the token is invalid', async () => {

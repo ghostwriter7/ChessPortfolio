@@ -1,9 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   MatCell,
@@ -20,7 +15,6 @@ import {
 import { CdkTableDataSourceInput } from '@angular/cdk/table';
 import { User } from '../../auth/model/user';
 import { MatButton } from '@angular/material/button';
-import { AuthService } from '../../auth/services/auth/auth.service';
 
 @Component({
   selector: 'app-lobby-page',
@@ -56,10 +50,4 @@ export class LobbyPageComponent {
     'username',
     'action',
   ];
-
-  private readonly authService = inject(AuthService);
-
-  protected onLogout(): void {
-    this.authService.logout();
-  }
 }

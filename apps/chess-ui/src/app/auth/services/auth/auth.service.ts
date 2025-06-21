@@ -1,31 +1,27 @@
-import { inject, Injectable, Signal, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { SignInFormValue, SignUpFormValue } from '../../model/form';
-import { User } from '../../model/user';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError, Observable, tap } from 'rxjs';
 import { AuthResponse } from '@api';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  public readonly $user: Signal<User | null>;
+  public readonly $user = computed(() => this.authResponse()?.username);
   private readonly router = inject(Router);
   private readonly refreshTokenInMs = 1000 * 55;
 
-  private authResponse: AuthResponse | null = null;
+  private readonly authResponse = signal<AuthResponse | null>(null);
 
   private readonly api = 'http://localhost:4201/api/auth';
-  private readonly user = signal<User | null>(null);
   private readonly httpClient = inject(HttpClient);
 
   constructor() {
-    this.$user = this.user.asReadonly();
-
     this.attemptToRefreshToken();
   }
 
   public logout(): void {
-    this.authResponse = null;
+    this.authResponse.set(null);
     this.httpClient
       .get(`${this.api}/logout`, { withCredentials: true })
       .subscribe();
@@ -58,7 +54,7 @@ export class AuthService {
     authResponse: AuthResponse,
     navigateToLobby = true
   ): void {
-    this.authResponse = authResponse;
+    this.authResponse.set(authResponse);
 
     setTimeout(() => this.attemptToRefreshToken(false), this.refreshTokenInMs);
 
