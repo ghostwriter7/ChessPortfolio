@@ -5,12 +5,12 @@
   </mat-card-header>
   <mat-card-content>
     @if (isSignIn()) {
-      <app-sign-in-form class="form-container" #form />
+      <app-sign-in-form class="form-container" #form (keydown.enter)="onSubmit()"/>
       <p class="message">Don't you have an account yet?
         <button matButton (click)="toggleMode()">Register</button>
       </p>
     } @else {
-      <app-sign-up-form class="form-container" #form/>
+      <app-sign-up-form class="form-container" #form (keydown.enter)="onSubmit()"/>
       <p class="message">Already have an account?
         <button matButton (click)="toggleMode()">Sign In</button>
       </p>

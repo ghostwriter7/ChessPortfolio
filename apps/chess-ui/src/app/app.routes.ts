@@ -1,5 +1,9 @@
 import { Routes } from '@angular/router';
 import { AuthPageComponent } from './auth/auth-page/auth-page.component';
+import { inject } from '@angular/core';
+import { AuthService } from './auth/services/auth/auth.service';
+
+const authGuard = () => !!inject(AuthService).$user();
 
 export const routes: Routes = [
   {
@@ -13,6 +17,8 @@ export const routes: Routes = [
       import('./lobby/lobby-page/lobby-page.component').then(
         (m) => m.LobbyPageComponent
       ),
+
+    canActivate: [authGuard],
   },
   {
     path: 'game',
@@ -20,6 +26,7 @@ export const routes: Routes = [
       import('./game/game-page/game-page.component').then(
         (m) => m.GamePageComponent
       ),
+    canActivate: [authGuard],
   },
   {
     path: '',
