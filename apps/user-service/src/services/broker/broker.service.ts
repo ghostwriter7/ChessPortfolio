@@ -1,9 +1,9 @@
-import { Kafka, Producer, RecordMetadata } from 'kafkajs';
 import { EventName, EventToPayload } from '@api';
+import { Kafka, Producer, RecordMetadata } from 'kafkajs';
 
 const kafka = new Kafka({
   clientId: 'user-srv',
-  brokers: ['localhost:9092'],
+  brokers: ['localhost:9094'],
 });
 
 export class BrokerService {
@@ -24,7 +24,7 @@ export class BrokerService {
   ): Promise<RecordMetadata[]> {
     return this.producer.send({
       topic,
-      messages: [{ key, value: value.toString() }],
+      messages: [{ key, value: JSON.stringify(value) }],
     });
   }
 }
