@@ -141,7 +141,11 @@ describe('UserService', () => {
     it('should generate access and refresh tokens when the refresh token is valid', async () => {
       jwtService.verifyToken.mockReturnValue({ userId: userId });
       userRepository.findUserById.mockReturnValue(
-        new User(userId, 'test', 'test', 'test@test.com')
+        User.builder()
+          .withId(userId)
+          .withUsername('test')
+          .withEmail('test@test.com')
+          .build()
       );
       jwtService.generateAuthTokens.mockReturnValue(tokens);
 

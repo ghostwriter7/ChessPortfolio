@@ -70,6 +70,12 @@ export class UserRepository {
   }
 
   private createUserFromRow(row: RowDataPacket): User {
-    return new User(row.id, row.username, row.password, row.email);
+    return User.builder()
+      .withId(row.id)
+      .withUsername(row.username)
+      .withEmail(row.email)
+      .withActive(row.active)
+      .withPassword(row.password)
+      .build();
   }
 }
