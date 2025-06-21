@@ -1,37 +1,52 @@
-import { CreateUserRequest, SignInRequest } from '@api';
+import {
+  CreateUserRequest,
+  EMAIL_NOTIFICATION_REQUESTED,
+  SignInRequest,
+} from '@api';
 import { PasswordHelper } from '../../helpers/password.helper';
 import { UserService } from './user.service';
 import { UserRepository } from '../../user-repository';
-import { JwtService } from '../jwt-service/jwt.service';
+import { JwtService } from '../jwt/jwt.service';
 import { BadRequestException } from '../../exceptions/bad-request-exception';
 import { UnauthorizedException } from '../../exceptions/unauthorized-exception';
 import { User } from '../../model/user';
 import * as jwt from 'jsonwebtoken';
 import { SqlException } from '../../exceptions/sql-exception';
 import { ForbiddenException } from '../../exceptions/forbidden-exception';
+import { BrokerService } from '../broker/broker.service';
 
 describe('UserService', () => {
   let userService: UserService;
+  let brokerService: {
+    send: jest.SpyInstance;
+  };
   let userRepository: {
     createUser: jest.SpyInstance;
     findUserByUsernameOrEmail: jest.SpyInstance;
     findUserById: jest.SpyInstance;
   };
   let jwtService: {
+    generateToken: jest.SpyInstance;
     generateAuthTokens: jest.SpyInstance;
     verifyToken: jest.SpyInstance;
   };
 
   beforeEach(() => {
-    jwtService = { generateAuthTokens: jest.fn(), verifyToken: jest.fn() };
+    jwtService = {
+      generateToken: jest.fn(),
+      generateAuthTokens: jest.fn(),
+      verifyToken: jest.fn(),
+    };
     userRepository = {
       createUser: jest.fn(),
       findUserByUsernameOrEmail: jest.fn(),
       findUserById: jest.fn(),
     };
+    brokerService = { send: jest.fn() };
     userService = new UserService(
       userRepository as unknown as UserRepository,
-      jwtService as unknown as JwtService
+      jwtService as unknown as JwtService,
+      brokerService as unknown as BrokerService
     );
   });
 
@@ -50,11 +65,25 @@ describe('UserService', () => {
       const hashPasswordSpy = jest
         .spyOn(PasswordHelper, 'hashPassword')
         .mockReturnValue(hashedPassword);
+      const verificationToken = 'dummy verification token';
+      jwtService.generateToken.mockReturnValue(verificationToken);
 
       userRepository.createUser.mockReturnValue(userId);
 
       const response = await userService.signUp(createUserRequest);
 
+      expect(brokerService.send).toHaveBeenCalledWith(
+        EMAIL_NOTIFICATION_REQUESTED,
+        userId.toString(),
+        {
+          email: createUserRequest.email,
+          message: expect.stringContaining(verificationToken),
+        }
+      );
+      expect(jwtService.generateToken).toHaveBeenCalledWith(
+        { userId, type: 'verification' },
+        '2d'
+      );
       expect(hashPasswordSpy).toHaveBeenCalledWith(createUserRequest.password);
       expect(userRepository.createUser).toHaveBeenCalledWith(
         createUserRequest.username,
