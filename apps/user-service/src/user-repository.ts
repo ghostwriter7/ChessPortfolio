@@ -8,13 +8,18 @@ export class UserRepository {
 
   public async createUser(
     username: string,
+    email: string,
     passwordHash: string
   ): Promise<number> {
-    const sql = `INSERT INTO users (username, password)
-                 VALUES (?, ?)`;
+    const sql = `INSERT INTO users (username, email, password)
+                 VALUES (?, ?, ?)`;
 
     try {
-      const [row] = await this.pool.execute(sql, [username, passwordHash]);
+      const [row] = await this.pool.execute(sql, [
+        username,
+        email,
+        passwordHash,
+      ]);
       return (row as ResultSetHeader).insertId;
     } catch (e) {
       const exceptionCode =
@@ -25,12 +30,17 @@ export class UserRepository {
     }
   }
 
-  public async findUserByUsername(username: string): Promise<User | null> {
+  public async findUserByUsernameOrEmail(
+    usernameOrEmail: string
+  ): Promise<User | null> {
     const sql = `SELECT *
                  FROM users
-                 WHERE username = ?`;
+                 WHERE username = ? OR email = ?`;
 
-    const [queryResult] = await this.pool.execute(sql, [username]);
+    const [queryResult] = await this.pool.execute(sql, [
+      usernameOrEmail,
+      usernameOrEmail,
+    ]);
 
     const rows = queryResult as RowDataPacket[];
 
@@ -39,11 +49,7 @@ export class UserRepository {
 
     const [user] = rows;
 
-    if (user) {
-      return new User(user.id, user.username, user.password);
-    }
-
-    return null;
+    return user ? this.createUserFromRow(user) : null;
   }
 
   public async findUserById(userId: number): Promise<User | null> {
@@ -60,10 +66,10 @@ export class UserRepository {
 
     const [user] = rows;
 
-    if (user) {
-      return new User(user.id, user.username, user.password);
-    }
+    return user ? this.createUserFromRow(user) : null;
+  }
 
-    return null;
+  private createUserFromRow(row: RowDataPacket): User {
+    return new User(row.id, row.username, row.password, row.email);
   }
 }

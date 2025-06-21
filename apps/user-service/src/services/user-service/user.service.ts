@@ -18,12 +18,13 @@ export class UserService {
   public async signUp(
     createUserRequest: CreateUserRequest
   ): Promise<TokensWithUsername> {
-    const { username, password } = createUserRequest;
+    const { username, password, email } = createUserRequest;
 
     const passwordHash = PasswordHelper.hashPassword(password);
     try {
       const userId = await this.userRepository.createUser(
         username,
+        email,
         passwordHash
       );
       const tokens = this.jwtService.generateAuthTokens(userId);
@@ -34,7 +35,7 @@ export class UserService {
         e instanceof SqlException &&
         e.code === SqlException.UNIQUE_VIOLATION
       ) {
-        throw new BadRequestException('Username already exists');
+        throw new BadRequestException('User exists');
       }
       throw new InternalServerException();
     }
@@ -45,7 +46,7 @@ export class UserService {
   ): Promise<TokensWithUsername> {
     const { username, password } = signInRequest;
 
-    const user = await this.userRepository.findUserByUsername(username);
+    const user = await this.userRepository.findUserByUsernameOrEmail(username);
 
     if (!user) {
       throw new BadRequestException(`User ${username} not found`);

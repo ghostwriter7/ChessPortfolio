@@ -13,7 +13,7 @@ describe('UserService', () => {
   let userService: UserService;
   let userRepository: {
     createUser: jest.SpyInstance;
-    findUserByUsername: jest.SpyInstance;
+    findUserByUsernameOrEmail: jest.SpyInstance;
     findUserById: jest.SpyInstance;
   };
   let jwtService: {
@@ -25,7 +25,7 @@ describe('UserService', () => {
     jwtService = { generateAuthTokens: jest.fn(), verifyToken: jest.fn() };
     userRepository = {
       createUser: jest.fn(),
-      findUserByUsername: jest.fn(),
+      findUserByUsernameOrEmail: jest.fn(),
       findUserById: jest.fn(),
     };
     userService = new UserService(
@@ -37,11 +37,13 @@ describe('UserService', () => {
   const tokens = { accessToken: 'access token', refreshToken: 'refresh token' };
 
   describe('signUp', () => {
+    const createUserRequest: CreateUserRequest = {
+      password: 'test123',
+      username: 'NewUser',
+      email: 'test@test.com',
+    };
+
     it('should save user and generate access and refresh tokens', async () => {
-      const createUserRequest: CreateUserRequest = {
-        password: 'test123',
-        username: 'NewUser',
-      };
       const userId = 100;
       const hashedPassword = '<PASSWORD>';
       const hashPasswordSpy = jest
@@ -56,6 +58,7 @@ describe('UserService', () => {
       expect(hashPasswordSpy).toHaveBeenCalledWith(createUserRequest.password);
       expect(userRepository.createUser).toHaveBeenCalledWith(
         createUserRequest.username,
+        createUserRequest.email,
         hashedPassword
       );
       expect(response).toEqual({
@@ -65,16 +68,12 @@ describe('UserService', () => {
     });
 
     it('should throw an error when username already exists', async () => {
-      const createUserRequest: CreateUserRequest = {
-        password: 'test123',
-        username: 'NewUser',
-      };
       userRepository.createUser.mockImplementation(() => {
         throw new SqlException('duplicate', SqlException.UNIQUE_VIOLATION);
       });
 
       await expect(userService.signUp(createUserRequest)).rejects.toThrow(
-        new BadRequestException('Username already exists')
+        new BadRequestException('User exists')
       );
     });
   });
@@ -90,15 +89,15 @@ describe('UserService', () => {
         new BadRequestException(`User ${signInRequest.username} not found`)
       );
 
-      expect(userRepository.findUserByUsername).toHaveBeenCalledWith(
+      expect(userRepository.findUserByUsernameOrEmail).toHaveBeenCalledWith(
         signInRequest.username
       );
-      expect(userRepository.findUserByUsername).toHaveBeenCalledTimes(1);
+      expect(userRepository.findUserByUsernameOrEmail).toHaveBeenCalledTimes(1);
       expect(jwtService.generateAuthTokens).not.toHaveBeenCalled();
     });
 
     it('should throw an exception when the password is incorrect', async () => {
-      userRepository.findUserByUsername.mockResolvedValue({
+      userRepository.findUserByUsernameOrEmail.mockResolvedValue({
         id: 1,
         passwordHash: '<HASH>',
       });
@@ -119,7 +118,7 @@ describe('UserService', () => {
 
     it('should return access and refresh tokens when the user exists and the password is correct', async () => {
       const userId = 1;
-      userRepository.findUserByUsername.mockResolvedValue({
+      userRepository.findUserByUsernameOrEmail.mockResolvedValue({
         id: userId,
         username: signInRequest.username,
         passwordHash: '<HASH>',
@@ -142,7 +141,7 @@ describe('UserService', () => {
     it('should generate access and refresh tokens when the refresh token is valid', async () => {
       jwtService.verifyToken.mockReturnValue({ userId: userId });
       userRepository.findUserById.mockReturnValue(
-        new User(userId, 'test', 'test')
+        new User(userId, 'test', 'test', 'test@test.com')
       );
       jwtService.generateAuthTokens.mockReturnValue(tokens);
 

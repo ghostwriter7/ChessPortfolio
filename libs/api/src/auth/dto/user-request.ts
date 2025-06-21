@@ -3,5 +3,8 @@ interface UserRequest {
   password: string;
 }
 
-export type CreateUserRequest = UserRequest;
+export interface CreateUserRequest extends UserRequest {
+  email: string;
+}
+
 export type SignInRequest = UserRequest;
