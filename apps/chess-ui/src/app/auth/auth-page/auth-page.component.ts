@@ -17,7 +17,7 @@ import {
   MatCardSubtitle,
   MatCardTitle,
 } from '@angular/material/card';
-import { catchError, EMPTY, finalize } from 'rxjs';
+import { catchError, EMPTY, finalize, tap } from 'rxjs';
 import { SpinnerComponent } from '../../ui/spinner/spinner.component';
 import { SignInFormValue, SignUpFormValue } from '../model/form';
 import { AuthService } from '../services/auth/auth.service';
@@ -67,17 +67,21 @@ export class AuthPageComponent {
 
     if (form && !form.isInvalid()) {
       this.isLoading.set(true);
+      this.error.set(null);
 
       (this.isSignIn()
         ? this.authService.signIn(form.getValue<SignInFormValue>())
         : this.authService.signUp(form.getValue<SignUpFormValue>())
       )
         .pipe(
+          tap(() => this.mode.set('signIn')),
           catchError((err) => {
             this.error.set(err?.message || err);
             return EMPTY;
           }),
-          finalize(() => this.isLoading.set(false))
+          finalize(() => {
+            this.isLoading.set(false);
+          })
         )
         .subscribe();
     }

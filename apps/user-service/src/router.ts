@@ -34,15 +34,12 @@ function handleAuthResponse(
 
 router.post(
   '/sign-up',
-  async (
-    req: Request<never, AuthResponse | ErrorResponse, CreateUserRequest>,
-    res
-  ) => {
+  async (req: Request<never, void | ErrorResponse, CreateUserRequest>, res) => {
     console.log(`[POST] /sign-up`);
 
     const createUserRequest = req.body;
-    const response = await userService.signUp(createUserRequest);
-    handleAuthResponse(res, 201, response);
+    await userService.signUp(createUserRequest);
+    res.status(201).end();
   }
 );
 

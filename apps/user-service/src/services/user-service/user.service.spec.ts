@@ -44,14 +44,13 @@ describe('UserService', () => {
       email: 'test@test.com',
     };
 
-    it('should save user and generate access and refresh tokens', async () => {
+    it('should save user', async () => {
       const userId = 100;
       const hashedPassword = '<PASSWORD>';
       const hashPasswordSpy = jest
         .spyOn(PasswordHelper, 'hashPassword')
         .mockReturnValue(hashedPassword);
 
-      jwtService.generateAuthTokens.mockReturnValue(tokens);
       userRepository.createUser.mockReturnValue(userId);
 
       const response = await userService.signUp(createUserRequest);
@@ -62,10 +61,7 @@ describe('UserService', () => {
         createUserRequest.email,
         hashedPassword
       );
-      expect(response).toEqual({
-        ...tokens,
-        username: createUserRequest.username,
-      });
+      expect(response).toEqual(userId);
     });
 
     it('should throw an error when username already exists', async () => {

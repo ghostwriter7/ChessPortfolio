@@ -16,21 +16,16 @@ export class UserService {
     private readonly jwtService: JwtService
   ) {}
 
-  public async signUp(
-    createUserRequest: CreateUserRequest
-  ): Promise<TokensWithUsername> {
+  public async signUp(createUserRequest: CreateUserRequest): Promise<number> {
     const { username, password, email } = createUserRequest;
 
     const passwordHash = PasswordHelper.hashPassword(password);
     try {
-      const userId = await this.userRepository.createUser(
+      return await this.userRepository.createUser(
         username,
         email,
         passwordHash
       );
-      const tokens = this.jwtService.generateAuthTokens(userId);
-      console.log('User successfully created');
-      return { ...tokens, username };
     } catch (e) {
       if (
         e instanceof SqlException &&

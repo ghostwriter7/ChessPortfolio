@@ -34,7 +34,7 @@ export class AuthService {
         withCredentials: true,
       })
       .pipe(
-        tap(this.handleAuthResponse.bind(this)),
+        tap(() => alert('Check your e-mail')),
         catchError(this.handleError.bind(this))
       );
   }
