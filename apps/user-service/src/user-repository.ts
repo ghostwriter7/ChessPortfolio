@@ -6,6 +6,14 @@ import { SqlException } from './exceptions/sql-exception';
 export class UserRepository {
   constructor(private readonly pool: Pool) {}
 
+  public async activateUser(userId: number): Promise<void> {
+    const sql = `UPDATE users
+                 SET active = TRUE
+                 WHERE id = ?`;
+
+    await this.pool.execute(sql, [userId]);
+  }
+
   public async createUser(
     username: string,
     email: string,
@@ -35,7 +43,8 @@ export class UserRepository {
   ): Promise<User | null> {
     const sql = `SELECT *
                  FROM users
-                 WHERE username = ? OR email = ?`;
+                 WHERE username = ?
+                    OR email = ?`;
 
     const [queryResult] = await this.pool.execute(sql, [
       usernameOrEmail,

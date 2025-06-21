@@ -114,4 +114,24 @@ export class UserService {
     console.log(`Tokens refreshed for ${user.username}`);
     return { ...tokens, username: user.username };
   }
+
+  public async verifyEmail(token: string): Promise<void> {
+    const { userId, type } = this.jwtService.verifyToken<TokenPayload>(token);
+
+    if (type !== 'verification') {
+      throw new BadRequestException('Invalid token');
+    }
+
+    const user = await this.userRepository.findUserById(userId);
+
+    if (!user) {
+      throw new BadRequestException(`User ${userId} not found`);
+    }
+
+    if (user.active) {
+      throw new BadRequestException('User is already active');
+    }
+
+    return this.userRepository.activateUser(userId);
+  }
 }

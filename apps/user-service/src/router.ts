@@ -79,4 +79,15 @@ router.get('/logout', (req, res) => {
     .sendStatus(204);
 });
 
+router.get('/verify/:token', async (req, res) => {
+  const token = req.params['token'];
+
+  if (!token) {
+    res.status(400).send();
+  } else {
+    await userService.verifyEmail(token);
+    res.redirect('http://localhost:4200/login');
+  }
+});
+
 export default router;
