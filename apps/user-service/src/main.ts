@@ -7,6 +7,7 @@ import { BadRequestException } from './exceptions/bad-request-exception';
 import { InternalServerException } from './exceptions/internal-server-exception';
 import { UnauthorizedException } from './exceptions/unauthorized-exception';
 import router from './router';
+import { ForbiddenException } from './exceptions/forbidden-exception';
 
 const app = express();
 
@@ -25,6 +26,8 @@ app.use((err: Error, req, res, next) => {
     err instanceof jwt.JsonWebTokenError
   ) {
     res.status(401).json({ message: err.message });
+  } else if (err instanceof ForbiddenException) {
+    res.status(403).json({ message: err.message });
   } else if (err instanceof InternalServerException) {
     res.status(500).json({ message: err.message });
   } else {

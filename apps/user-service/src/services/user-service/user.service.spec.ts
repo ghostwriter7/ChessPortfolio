@@ -8,6 +8,7 @@ import { UnauthorizedException } from '../../exceptions/unauthorized-exception';
 import { User } from '../../model/user';
 import * as jwt from 'jsonwebtoken';
 import { SqlException } from '../../exceptions/sql-exception';
+import { ForbiddenException } from '../../exceptions/forbidden-exception';
 
 describe('UserService', () => {
   let userService: UserService;
@@ -78,6 +79,16 @@ describe('UserService', () => {
     });
   });
 
+  const userId = 100;
+
+  const anyActiveUser = User.builder()
+    .withId(userId)
+    .withActive(true)
+    .withUsername('test')
+    .withPassword('<HASH>')
+    .withEmail('test@test.com')
+    .build();
+
   describe('signIn', () => {
     const signInRequest: SignInRequest = {
       username: 'test',
@@ -96,11 +107,25 @@ describe('UserService', () => {
       expect(jwtService.generateAuthTokens).not.toHaveBeenCalled();
     });
 
-    it('should throw an exception when the password is incorrect', async () => {
-      userRepository.findUserByUsernameOrEmail.mockResolvedValue({
-        id: 1,
-        passwordHash: '<HASH>',
+    it('should throw an exception when the user exists but is inactive', async () => {
+      userRepository.findUserByUsernameOrEmail.mockReturnValue({
+        ...anyActiveUser,
+        active: false,
       });
+
+      await expect(userService.signIn(signInRequest)).rejects.toThrow(
+        new ForbiddenException('User is not active')
+      );
+
+      expect(userRepository.findUserByUsernameOrEmail).toHaveBeenCalledWith(
+        signInRequest.username
+      );
+      expect(userRepository.findUserByUsernameOrEmail).toHaveBeenCalledTimes(1);
+      expect(jwtService.generateAuthTokens).not.toHaveBeenCalled();
+    });
+
+    it('should throw an exception when the password is incorrect', async () => {
+      userRepository.findUserByUsernameOrEmail.mockResolvedValue(anyActiveUser);
       const verifyPasswordSpy = jest
         .spyOn(PasswordHelper, 'verifyPassword')
         .mockReturnValue(false);
@@ -116,37 +141,27 @@ describe('UserService', () => {
       expect(jwtService.generateAuthTokens).not.toHaveBeenCalled();
     });
 
-    it('should return access and refresh tokens when the user exists and the password is correct', async () => {
-      const userId = 1;
-      userRepository.findUserByUsernameOrEmail.mockResolvedValue({
-        id: userId,
-        username: signInRequest.username,
-        passwordHash: '<HASH>',
-      });
+    it('should return access and refresh tokens when the user exists, is active and the password is correct', async () => {
+      userRepository.findUserByUsernameOrEmail.mockResolvedValue(anyActiveUser);
       jest.spyOn(PasswordHelper, 'verifyPassword').mockReturnValue(true);
       jwtService.generateAuthTokens.mockReturnValue(tokens);
 
       const response = await userService.signIn(signInRequest);
 
       expect(response).toEqual({ ...tokens, username: signInRequest.username });
-      expect(jwtService.generateAuthTokens).toHaveBeenCalledWith(userId);
+      expect(jwtService.generateAuthTokens).toHaveBeenCalledWith(
+        anyActiveUser.id
+      );
       expect(jwtService.generateAuthTokens).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('refreshTokens', () => {
     const token = 'access token';
-    const userId = 100;
 
     it('should generate access and refresh tokens when the refresh token is valid', async () => {
-      jwtService.verifyToken.mockReturnValue({ userId: userId });
-      userRepository.findUserById.mockReturnValue(
-        User.builder()
-          .withId(userId)
-          .withUsername('test')
-          .withEmail('test@test.com')
-          .build()
-      );
+      jwtService.verifyToken.mockReturnValue({ userId: anyActiveUser.id });
+      userRepository.findUserById.mockReturnValue(anyActiveUser);
       jwtService.generateAuthTokens.mockReturnValue(tokens);
 
       const response = await userService.refreshTokens(token);
@@ -154,7 +169,7 @@ describe('UserService', () => {
       expect(jwtService.verifyToken).toHaveBeenCalledWith(token);
       expect(userRepository.findUserById).toHaveBeenCalledWith(userId);
       expect(jwtService.generateAuthTokens).toHaveBeenCalledWith(userId);
-      expect(response).toEqual({ ...tokens, username: 'test' });
+      expect(response).toEqual({ ...tokens, username: anyActiveUser.username });
     });
 
     it('should throw an exception when the token is invalid', async () => {
@@ -176,6 +191,21 @@ describe('UserService', () => {
 
       await expect(userService.refreshTokens(token)).rejects.toThrow(
         new BadRequestException(`User ${userId} not found`)
+      );
+
+      expect(userRepository.findUserById).toHaveBeenCalledWith(userId);
+      expect(jwtService.generateAuthTokens).not.toHaveBeenCalled();
+    });
+
+    it('should throw an exception when the user exists but is inactive', async () => {
+      jwtService.verifyToken.mockReturnValue({ userId });
+      userRepository.findUserById.mockReturnValue({
+        ...anyActiveUser,
+        active: false,
+      });
+
+      await expect(userService.refreshTokens(token)).rejects.toThrow(
+        new ForbiddenException('User is not active')
       );
 
       expect(userRepository.findUserById).toHaveBeenCalledWith(userId);

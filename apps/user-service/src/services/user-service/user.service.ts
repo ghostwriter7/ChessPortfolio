@@ -8,6 +8,7 @@ import { TokensWithUsername } from '../../dtos/tokens';
 import { TokenPayload } from '../../dtos/token-payload';
 import { SqlException } from '../../exceptions/sql-exception';
 import { InternalServerException } from '../../exceptions/internal-server-exception';
+import { ForbiddenException } from '../../exceptions/forbidden-exception';
 
 export class UserService {
   constructor(
@@ -52,6 +53,10 @@ export class UserService {
       throw new BadRequestException(`User ${username} not found`);
     }
 
+    if (!user.active) {
+      throw new ForbiddenException('User is not active');
+    }
+
     const isValidPassword = PasswordHelper.verifyPassword(
       password,
       user.passwordHash
@@ -75,6 +80,10 @@ export class UserService {
 
     if (!user) {
       throw new BadRequestException(`User ${userId} not found`);
+    }
+
+    if (!user.active) {
+      throw new ForbiddenException('User is not active');
     }
 
     const tokens = this.jwtService.generateAuthTokens(user.id);
