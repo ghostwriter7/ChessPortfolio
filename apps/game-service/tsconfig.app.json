@@ -2,7 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../dist/apps/game-service",
-    "module": "commonjs",
+    "module": "esnext",
     "types": ["node", "express"]
   },
   "include": ["src/**/*.ts"],

@@ -1,8 +1,8 @@
 import mysql, { PoolOptions } from 'mysql2/promise';
 
 const options: PoolOptions = {
-  host: 'localhost',
-  port: 4500,
+  host: 'mysql',
+  port: 3306,
   user: 'user-srv',
   password: 'test',
   database: 'userdb',

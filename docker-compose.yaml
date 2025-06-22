@@ -4,14 +4,13 @@ services:
     container_name: broker
     ports:
       - "9092:9092"
-      - "9094:9094"
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:9094,CONTROLLER://localhost:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9092,PLAINTEXT_HOST://localhost:9094
+      KAFKA_LISTENERS: PLAINTEXT://broker:9092,CONTROLLER://localhost:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9092
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
@@ -30,7 +29,7 @@ services:
       - "8080:8080"
   user-db:
     image: mysql
-    container_name: user-db
+    container_name: mysql
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: admin
@@ -39,4 +38,17 @@ services:
       MYSQL_PASSWORD: test
     ports:
       - "4500:3306"
-
+  user-srv:
+    container_name: user-srv
+    build:
+      dockerfile: ./apps/user-service/Dockerfile
+      context: .
+    ports:
+      - "4201:4201"
+    volumes:
+      - ./apps:/app/apps
+      - ./libs:/app/libs
+      - /app/node_modules
+    depends_on:
+      - mysql
+      - broker

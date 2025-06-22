@@ -3,7 +3,7 @@ import { Kafka, Producer, RecordMetadata } from 'kafkajs';
 
 const kafka = new Kafka({
   clientId: 'user-srv',
-  brokers: ['localhost:9094'],
+  brokers: ['broker:9092'],
 });
 
 export class BrokerService {
