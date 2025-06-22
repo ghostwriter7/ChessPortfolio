@@ -35,8 +35,8 @@ app.use((err: Error, req, res, next) => {
   }
 });
 
-const port = process.env.PORT;
-const server = app.listen(port, () => {
-  console.log(`User-Service Listening at http://localhost:${port}/api`);
+const PORT = process.env.PORT;
+const server = app.listen(PORT, () => {
+  console.log(`User-Service is running on port ${PORT}`);
 });
 server.on('error', console.error);

@@ -4,11 +4,12 @@ import { Kafka } from 'kafkajs';
 
 const app = express();
 
-const port = process.env.PORT;
+const PORT = process.env.PORT;
+const BROKER_PORT = process.env.BROKER_PORT;
 
 const kafka = new Kafka({
   clientId: 'notification-srv',
-  brokers: ['broker:9092'],
+  brokers: [`broker:${BROKER_PORT}`],
 });
 
 const consumer = kafka.consumer({ groupId: 'notification-srv' });
@@ -27,6 +28,6 @@ await consumer.run({
     console.log(topic);
   },
 });
-app.listen(port, () => {
-  console.log(`Notification Service listening at http://localhost:${port}/api`);
+app.listen(PORT, () => {
+  console.log(`Notification-Service is running on port ${PORT}`);
 });

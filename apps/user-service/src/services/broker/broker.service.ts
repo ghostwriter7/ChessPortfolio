@@ -1,9 +1,11 @@
 import { EventName, EventToPayload } from '@api';
 import { Kafka, Producer, RecordMetadata } from 'kafkajs';
 
+const BROKER_PORT = process.env.BROKER_PORT;
+
 const kafka = new Kafka({
   clientId: 'user-srv',
-  brokers: ['broker:9092'],
+  brokers: [`broker:${BROKER_PORT}`],
 });
 
 export class BrokerService {

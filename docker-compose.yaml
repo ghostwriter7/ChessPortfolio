@@ -52,6 +52,7 @@ services:
       - /app/node_modules
     environment:
       PORT: 4201
+      BROKER_PORT: 9092
     depends_on:
       - mysql
       - broker
@@ -83,5 +84,6 @@ services:
       - /app/node_modules
     environment:
       PORT: 4203
+      BROKER_PORT: 9092
     depends_on:
       - broker
