@@ -12,6 +12,6 @@ RUN npm install nodemon --global
 
 CMD nodemon --ext ts,json \
   --legacy-watch \
-  --watch apps \
+  --watch apps/notification-service \
   --watch libs \
   --exec "npx nx build notification-service && node --inspect=0.0.0.0:4303 dist/apps/notification-service/main.js"
