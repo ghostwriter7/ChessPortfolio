@@ -4,11 +4,11 @@ import { Kafka } from 'kafkajs';
 
 const app = express();
 
-const port = process.env.PORT || 4202;
+const port = process.env.PORT;
 
 const kafka = new Kafka({
   clientId: 'notification-srv',
-  brokers: ['localhost:9094'],
+  brokers: ['broker:9092'],
 });
 
 const consumer = kafka.consumer({ groupId: 'notification-srv' });

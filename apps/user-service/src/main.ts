@@ -35,7 +35,7 @@ app.use((err: Error, req, res, next) => {
   }
 });
 
-const port = process.env.PORT || 4201;
+const port = process.env.PORT;
 const server = app.listen(port, () => {
   console.log(`User-Service Listening at http://localhost:${port}/api`);
 });

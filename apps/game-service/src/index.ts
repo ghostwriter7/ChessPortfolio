@@ -9,7 +9,7 @@ import { Server, Socket } from 'socket.io';
 import { Game } from './models/game';
 import { GameManager } from './services/game-manager';
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 
 const app = express();
 const server = createServer(app);

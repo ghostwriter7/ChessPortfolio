@@ -27,7 +27,7 @@ services:
       - broker
     ports:
       - "8080:8080"
-  user-db:
+  mysql:
     image: mysql
     container_name: mysql
     restart: always
@@ -50,6 +50,38 @@ services:
       - ./apps:/app/apps
       - ./libs:/app/libs
       - /app/node_modules
+    environment:
+      PORT: 4201
     depends_on:
       - mysql
+      - broker
+  game-srv:
+    container_name: game-srv
+    build:
+      dockerfile: ./apps/game-service/Dockerfile
+      context: .
+    ports:
+      - "4202:4202"
+      - "4302:4302"
+    volumes:
+      - ./apps:/app/apps
+      - ./libs:/app/libs
+      - /app/node_modules
+    environment:
+      PORT: 4202
+  notification-srv:
+    container_name: notification-srv
+    build:
+      dockerfile: ./apps/notification-service/Dockerfile
+      context: .
+    ports:
+      - "4203:4203"
+      - "4303:4303"
+    volumes:
+      - ./apps:/app/apps
+      - ./libs:/app/libs
+      - /app/node_modules
+    environment:
+      PORT: 4203
+    depends_on:
       - broker
