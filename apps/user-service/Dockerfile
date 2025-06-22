@@ -8,9 +8,10 @@ RUN npm ci --force
 
 COPY . .
 
-CMD npx nodemon \
+RUN npm install nodemon --global
+
+CMD nodemon --ext ts,json \
   --legacy-watch \
-  --inspect=0.0.0.0:9229 \
-  --watch . \
-  --ext ts,json \
-  --exec "node apps/user-service/src/main.ts"
+  --watch libs \
+  --watch apps \
+  --exec "npx nx build user-service && node --inspect=0.0.0.0:4301 dist/apps/user-service/main.js"

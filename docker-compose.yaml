@@ -45,6 +45,7 @@ services:
       context: .
     ports:
       - "4201:4201"
+      - "4301:4301"
     volumes:
       - ./apps:/app/apps
       - ./libs:/app/libs
