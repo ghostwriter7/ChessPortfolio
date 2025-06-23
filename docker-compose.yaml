@@ -17,6 +17,7 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_NUM_PARTITIONS: 3
+
   kafka-ui:
     container_name: kafka-ui
     image: provectuslabs/kafka-ui:latest
@@ -27,6 +28,7 @@ services:
       - broker
     ports:
       - "8080:8080"
+
   mysql:
     image: mysql
     container_name: mysql
@@ -38,6 +40,7 @@ services:
       MYSQL_PASSWORD: test
     ports:
       - "4500:3306"
+
   user-srv:
     container_name: user-srv
     build:
@@ -56,6 +59,7 @@ services:
     depends_on:
       - mysql
       - broker
+
   game-srv:
     container_name: game-srv
     build:
@@ -70,6 +74,7 @@ services:
       - /app/node_modules
     environment:
       PORT: 4202
+
   notification-srv:
     container_name: notification-srv
     build:
@@ -87,3 +92,28 @@ services:
       BROKER_PORT: 9092
     depends_on:
       - broker
+
+  chess-ui-builder:
+    container_name: chess-ui-builder
+    build:
+      dockerfile: ./apps/chess-ui/Dockerfile
+      context: .
+    volumes:
+      - ./apps:/app/apps
+      - ./libs:/app/libs
+      - ./dist/apps/chess-ui/browser:/app/dist/apps/chess-ui/browser
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+
+  nginx:
+    container_name: nginx
+    build:
+      dockerfile: nginx/Dockerfile
+      context: .
+    ports:
+      - "4200:80"
+    volumes:
+      - ./dist/apps/chess-ui/browser:/usr/share/nginx/html
+    depends_on:
+      - chess-ui-builder
