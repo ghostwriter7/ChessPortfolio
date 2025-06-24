@@ -1,8 +1,29 @@
-import { EMAIL_NOTIFICATION_REQUESTED } from '@api';
+import {
+  EMAIL_NOTIFICATION_REQUESTED,
+  EventToPayload,
+  loggerFactory,
+} from '@api';
 import { Kafka } from 'kafkajs';
+import * as nodemailer from 'nodemailer';
 
-const PORT = process.env.PORT;
 const BROKER_PORT = process.env.BROKER_PORT;
+const EMAIL_ACCOUNT = process.env.EMAIL_ACCOUNT;
+const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
+
+const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false,
+  auth: {
+    user: EMAIL_ACCOUNT,
+    pass: EMAIL_PASSWORD,
+  },
+  tls: {
+    rejectUnauthorized: false,
+  },
+});
+
+const logger = loggerFactory();
 
 const kafka = new Kafka({
   clientId: 'notification-srv',
@@ -19,9 +40,27 @@ await consumer.subscribe({
 
 await consumer.run({
   eachMessage: async ({ topic, partition, message }) => {
-    const payload = JSON.parse(message.value.toString());
-    console.log(payload);
-    console.log(message.key.toString());
-    console.log(topic);
+    logger.info(`Received message on ${topic} [${partition}]`);
+    try {
+      const {
+        email,
+        subject,
+        message: emailMessage,
+      } = (JSON.parse(
+        message.value.toString()
+      ) as EventToPayload['EMAIL_NOTIFICATION_REQUESTED']) || {};
+
+      const info = await transporter.sendMail({
+        from: EMAIL_ACCOUNT,
+        subject,
+        to: email,
+        html: emailMessage,
+      });
+
+      logger.info(`Message sent: ${info.messageId}`);
+    } catch (error) {
+      logger.error('Failed to send an e-mail');
+      console.error(error);
+    }
   },
 });

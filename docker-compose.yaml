@@ -82,14 +82,14 @@ services:
       dockerfile: ./apps/notification-service/Dockerfile
       context: .
     ports:
-      - "4203:4203"
       - "4303:4303"
     volumes:
       - ./apps:/app/apps
       - ./libs:/app/libs
       - /app/node_modules
+    env_file:
+      - .env
     environment:
-      PORT: 4203
       BROKER_PORT: 9092
     depends_on:
       - broker

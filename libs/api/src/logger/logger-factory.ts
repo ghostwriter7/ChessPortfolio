@@ -8,13 +8,11 @@ const logFormat = printf(
     `${timestamp} [${label}] ${level}: ${message}`
 );
 
-export function loggerFactory({
-  service,
-  level = 'info',
-}: {
-  service: string;
+export function loggerFactory(params?: {
+  service?: string;
   level?: string;
 }): Logger {
+  const { service = 'Root', level = 'info' } = params ?? {};
   const logger = createLogger({
     level: level,
     format: combine(label({ label: service }), timestamp(), logFormat),

@@ -4,18 +4,18 @@ import {
   loggerFactory,
   SignInRequest,
 } from '@api';
+import { TokenPayload } from '../../dtos/token-payload';
+import { TokensWithUsername } from '../../dtos/tokens';
 import { BadRequestException } from '../../exceptions/bad-request-exception';
+import { ForbiddenException } from '../../exceptions/forbidden-exception';
+import { InternalServerException } from '../../exceptions/internal-server-exception';
+import { SqlException } from '../../exceptions/sql-exception';
 import { UnauthorizedException } from '../../exceptions/unauthorized-exception';
 import { PasswordHelper } from '../../helpers/password.helper';
-import { UserRepository } from '../../user-repository';
-import { JwtService } from '../jwt/jwt.service';
-import { TokensWithUsername } from '../../dtos/tokens';
-import { TokenPayload } from '../../dtos/token-payload';
-import { SqlException } from '../../exceptions/sql-exception';
-import { InternalServerException } from '../../exceptions/internal-server-exception';
-import { ForbiddenException } from '../../exceptions/forbidden-exception';
-import { BrokerService } from '../broker/broker.service';
 import { User } from '../../model/user';
+import { UserRepository } from '../../user-repository';
+import { BrokerService } from '../broker/broker.service';
+import { JwtService } from '../jwt/jwt.service';
 
 export class UserService {
   private readonly logger = loggerFactory({ service: UserService.name });
@@ -50,6 +50,7 @@ export class UserService {
         userId.toString(),
         {
           email,
+          subject: 'Welcome To Chess Portfolio',
           message: `
           Welcome to Chess Portfolio.
           Please click on the link below to verify your email address.

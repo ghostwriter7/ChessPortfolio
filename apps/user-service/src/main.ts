@@ -14,7 +14,7 @@ const app = express();
 
 await initializeDatabase();
 
-const logger = loggerFactory({ service: 'Root' });
+const logger = loggerFactory();
 app.use(loggingMiddlewareFactory(logger));
 app.use(cors({ origin: 'http://localhost:4200', credentials: true }));
 app.use(express.json());

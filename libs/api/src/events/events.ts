@@ -6,6 +6,7 @@ export type EventName = typeof EMAIL_NOTIFICATION_REQUESTED;
 export type EventToPayload = {
   [EMAIL_NOTIFICATION_REQUESTED]: {
     email: string;
+    subject: string;
     message: string;
   };
 };
