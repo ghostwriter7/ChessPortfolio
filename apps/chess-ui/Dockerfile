@@ -8,10 +8,4 @@ RUN npm ci --force
 
 COPY . .
 
-RUN npm install nodemon --global
-
-CMD nodemon --ext ts,json,html,scss \
-  --legacy-watch \
-  --watch apps/chess-ui \
-  --watch libs \
-  --exec "npx nx build chess-ui --source-map=true"
+CMD npx nx serve chess-ui --host=0.0.0.0 --poll=100

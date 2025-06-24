@@ -22,8 +22,9 @@ services:
     container_name: kafka-ui
     image: provectuslabs/kafka-ui:latest
     environment:
-      - KAFKA_CLUSTERS_0_NAME=local
-      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=broker:9092
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: broker:9092
+      LOGGING_LEVEL_COM_PROVECTUS: INFO
     depends_on:
       - broker
     ports:
@@ -98,22 +99,23 @@ services:
     build:
       dockerfile: ./apps/chess-ui/Dockerfile
       context: .
+    ports:
+      - "4200:4200"
     volumes:
       - ./apps:/app/apps
       - ./libs:/app/libs
-      - ./dist/apps/chess-ui/browser:/app/dist/apps/chess-ui/browser
       - /app/node_modules
     environment:
       NODE_ENV: development
 
-  nginx:
-    container_name: nginx
-    build:
-      dockerfile: nginx/Dockerfile
-      context: .
-    ports:
-      - "4200:80"
-    volumes:
-      - ./dist/apps/chess-ui/browser:/usr/share/nginx/html
-    depends_on:
-      - chess-ui-builder
+#  nginx:
+#    container_name: nginx
+#    build:
+#      dockerfile: nginx/Dockerfile
+#      context: .
+#    ports:
+#      - "4200:80"
+#    volumes:
+#      - ./dist/apps/chess-ui/browser:/usr/share/nginx/html
+#    depends_on:
+#      - chess-ui-builder
