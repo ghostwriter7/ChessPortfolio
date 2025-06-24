@@ -1,6 +1,7 @@
 import {
   CreateUserRequest,
   EMAIL_NOTIFICATION_REQUESTED,
+  loggerFactory,
   SignInRequest,
 } from '@api';
 import { BadRequestException } from '../../exceptions/bad-request-exception';
@@ -17,6 +18,8 @@ import { BrokerService } from '../broker/broker.service';
 import { User } from '../../model/user';
 
 export class UserService {
+  private readonly logger = loggerFactory({ service: UserService.name });
+
   constructor(
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
@@ -82,7 +85,7 @@ export class UserService {
     }
 
     const tokens = this.jwtService.generateAuthTokens(user.id);
-    console.log('User successfully signed in');
+    this.logger.info('User successfully signed in');
     return { ...tokens, username: user.username };
   }
 
@@ -97,7 +100,7 @@ export class UserService {
     this.verifyUserIsActive(user);
 
     const tokens = this.jwtService.generateAuthTokens(user.id);
-    console.log(`Tokens refreshed for ${user.username}`);
+    this.logger.info(`Tokens refreshed for ${user.username}`);
     return { ...tokens, username: user.username };
   }
 

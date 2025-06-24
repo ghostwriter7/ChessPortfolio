@@ -38,8 +38,6 @@ function handleAuthResponse(
 router.post(
   '/sign-up',
   async (req: Request<never, void | ErrorResponse, CreateUserRequest>, res) => {
-    console.log(`[POST] /sign-up`);
-
     const createUserRequest = req.body;
     await userService.signUp(createUserRequest);
     res.status(201).end();
@@ -52,7 +50,6 @@ router.post(
     req: Request<never, AuthResponse | ErrorResponse, SignInRequest>,
     res
   ) => {
-    console.log('[POST] /sign-in');
     const signInRequest = req.body;
     const response = await userService.signIn(signInRequest);
     handleAuthResponse(res, 200, response);
@@ -60,7 +57,6 @@ router.post(
 );
 
 router.get('/refresh', async (req, res) => {
-  console.log('[GET] /refresh');
   const { refreshToken } = req.cookies;
 
   if (!refreshToken) {
@@ -72,7 +68,6 @@ router.get('/refresh', async (req, res) => {
 });
 
 router.get('/logout', (req, res) => {
-  console.log('[GET] /logout');
   res
     .status(204)
     .clearCookie('refreshToken', { httpOnly: true })

@@ -1,8 +1,5 @@
 import { EMAIL_NOTIFICATION_REQUESTED } from '@api';
-import express from 'express';
 import { Kafka } from 'kafkajs';
-
-const app = express();
 
 const PORT = process.env.PORT;
 const BROKER_PORT = process.env.BROKER_PORT;
@@ -27,7 +24,4 @@ await consumer.run({
     console.log(message.key.toString());
     console.log(topic);
   },
-});
-app.listen(PORT, () => {
-  console.log(`Notification-Service is running on port ${PORT}`);
 });

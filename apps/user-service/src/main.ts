@@ -8,11 +8,14 @@ import { InternalServerException } from './exceptions/internal-server-exception'
 import { UnauthorizedException } from './exceptions/unauthorized-exception';
 import router from './router';
 import { ForbiddenException } from './exceptions/forbidden-exception';
+import { loggerFactory, loggingMiddlewareFactory } from '@api';
 
 const app = express();
 
 await initializeDatabase();
 
+const logger = loggerFactory({ service: 'Root' });
+app.use(loggingMiddlewareFactory(logger));
 app.use(cors({ origin: 'http://localhost:4200', credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
@@ -37,6 +40,6 @@ app.use((err: Error, req, res, next) => {
 
 const PORT = process.env.PORT;
 const server = app.listen(PORT, () => {
-  console.log(`User-Service is running on port ${PORT}`);
+  logger.info(`User-Service is running on port ${PORT}`);
 });
 server.on('error', console.error);
