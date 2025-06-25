@@ -8,13 +8,13 @@ import { InternalServerException } from './exceptions/internal-server-exception'
 import { UnauthorizedException } from './exceptions/unauthorized-exception';
 import router from './router';
 import { ForbiddenException } from './exceptions/forbidden-exception';
-import { loggerFactory, loggingMiddlewareFactory } from '@api';
+import { loggerFactory, loggingMiddlewareFactory, retry } from '@api';
 
 const app = express();
 
-await initializeDatabase();
-
 const logger = loggerFactory();
+await retry(async () => await initializeDatabase(logger), logger);
+
 app.use(loggingMiddlewareFactory(logger));
 app.use(cors({ origin: 'http://localhost:4200', credentials: true }));
 app.use(express.json());

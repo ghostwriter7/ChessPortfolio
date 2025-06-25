@@ -34,6 +34,8 @@ services:
     image: mysql
     container_name: mysql
     restart: always
+    volumes:
+      - mysql-data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: admin
       MYSQL_DATABASE: userdb
@@ -53,6 +55,7 @@ services:
     volumes:
       - ./apps:/app/apps
       - ./libs:/app/libs
+      - ./dist:/app/dist
       - /app/node_modules
     environment:
       PORT: 4201
@@ -72,6 +75,7 @@ services:
     volumes:
       - ./apps:/app/apps
       - ./libs:/app/libs
+      - ./dist:/app/dist
       - /app/node_modules
     environment:
       PORT: 4202
@@ -86,6 +90,7 @@ services:
     volumes:
       - ./apps:/app/apps
       - ./libs:/app/libs
+      - ./dist:/app/dist
       - /app/node_modules
     env_file:
       - .env
@@ -104,6 +109,7 @@ services:
     volumes:
       - ./apps:/app/apps
       - ./libs:/app/libs
+      - ./dist:/app/dist
       - /app/node_modules
     environment:
       NODE_ENV: development
@@ -119,3 +125,6 @@ services:
 #      - ./dist/apps/chess-ui/browser:/usr/share/nginx/html
 #    depends_on:
 #      - chess-ui-builder
+
+volumes:
+  mysql-data:

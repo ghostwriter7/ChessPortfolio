@@ -1,3 +1,4 @@
+import { Logger } from '@api';
 import mysql, { PoolOptions } from 'mysql2/promise';
 
 const options: PoolOptions = {
@@ -11,7 +12,7 @@ const options: PoolOptions = {
 
 const pool = mysql.createPool(options);
 
-export async function initializeDatabase(): Promise<void> {
+export async function initializeDatabase(logger: Logger): Promise<void> {
   const createUserTableSQL = `
     CREATE TABLE IF NOT EXISTS users (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -27,7 +28,7 @@ export async function initializeDatabase(): Promise<void> {
   try {
     await pool.execute(createUserTableSQL);
   } catch (error) {
-    console.error('Database initialization failed:');
+    logger.error('Database initialization failed:');
     console.error(error);
   }
 }

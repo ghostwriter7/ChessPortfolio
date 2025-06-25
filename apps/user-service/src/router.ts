@@ -81,7 +81,7 @@ router.get('/verify/:token', async (req, res) => {
     res.status(400).send();
   } else {
     await userService.verifyEmail(token);
-    res.redirect('http://localhost:4200/login');
+    res.redirect('http://localhost:4200/auth');
   }
 });
 
