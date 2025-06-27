@@ -99,6 +99,21 @@ services:
     depends_on:
       - broker
 
+  lobby-srv:
+    container_name: lobby-srv
+    build:
+      dockerfile: ./apps/lobby-service/Dockerfile
+      context: .
+    ports:
+      - "4304:4304"
+    volumes:
+      - ./apps:/app/apps
+      - ./libs:/app/libs
+      - ./dist:/app/dist
+      - /app/node_modules
+    env_file:
+      - .env
+
   chess-ui-builder:
     container_name: chess-ui-builder
     build:
