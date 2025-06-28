@@ -3,7 +3,7 @@ import { loggerFactory } from '@api';
 import { PlayerRepository } from '../repository/player.repository';
 import {
   ChallengePlayerCommandPayload,
-  GameRequestedEvent,
+  GAME_REQUESTED_EVENT,
   PLAYERS_MATCHED_EVENT,
   PlayersMatchedEventPayload,
 } from '@chess-logic';
@@ -24,14 +24,14 @@ export class ChallengePlayerCommandHandler {
     ack: (result: { response: boolean; message?: string }) => void
   ): Promise<void> {
     const username = this.socket.data.username;
+    const logger = this.logger;
 
     if (!username) {
-      this.logger.error('ChallengePlayerCommand emitted before authentication');
+      logger.error('ChallengePlayerCommand emitted before authentication');
       return;
     }
 
     const opponent = payload?.opponent;
-    const logger = this.logger;
 
     if (!opponent) {
       logger.error('Invalid payload: opponent is missing');
@@ -45,10 +45,7 @@ export class ChallengePlayerCommandHandler {
     try {
       const result = await opponentSocket
         .timeout(10000)
-        .emitWithAck(
-          GameRequestedEvent.name,
-          new GameRequestedEvent({ opponent: username })
-        );
+        .emitWithAck(GAME_REQUESTED_EVENT, { opponent: username });
 
       if (result) {
         ack({ response: true });
