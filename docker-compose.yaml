@@ -105,6 +105,7 @@ services:
       dockerfile: ./apps/lobby-service/Dockerfile
       context: .
     ports:
+      - "4204:4204"
       - "4304:4304"
     volumes:
       - ./apps:/app/apps
@@ -113,6 +114,8 @@ services:
       - /app/node_modules
     env_file:
       - .env
+    environment:
+      PORT: 4204
 
   chess-ui-builder:
     container_name: chess-ui-builder

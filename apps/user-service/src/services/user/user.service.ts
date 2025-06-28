@@ -85,7 +85,7 @@ export class UserService {
       throw new UnauthorizedException();
     }
 
-    const tokens = this.jwtService.generateAuthTokens(user.id);
+    const tokens = this.jwtService.generateAuthTokens(user.id, username);
     this.logger.info('User successfully signed in');
     return { ...tokens, username: user.username };
   }
@@ -100,7 +100,7 @@ export class UserService {
     this.verifyUserExists(user, userId);
     this.verifyUserIsActive(user);
 
-    const tokens = this.jwtService.generateAuthTokens(user.id);
+    const tokens = this.jwtService.generateAuthTokens(user.id, user.username);
     this.logger.info(`Tokens refreshed for ${user.username}`);
     return { ...tokens, username: user.username };
   }

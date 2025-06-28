@@ -17,7 +17,7 @@ export class LoginCommandHandler {
     private readonly playerRepository: PlayerRepository
   ) {}
 
-  public handle(payload: LoginCommandPayload): boolean {
+  public handle(payload: LoginCommandPayload): void {
     const logger = this.logger;
     const socket = this.socket;
 
@@ -26,7 +26,7 @@ export class LoginCommandHandler {
     if (!token) {
       socket.disconnect(true);
       logger.error('A player tried to login without a token (disconnected).');
-      return false;
+      return;
     }
 
     let username: string;
@@ -39,7 +39,7 @@ export class LoginCommandHandler {
         `A player's auth token does not contain username property (disconnected).`,
         e
       );
-      return false;
+      return;
     }
 
     if (username) {
@@ -57,10 +57,6 @@ export class LoginCommandHandler {
         PlayerListChangedEvent.name,
         new PlayerListChangedEvent({ usernames })
       );
-
-      return true;
     }
-
-    return false;
   }
 }

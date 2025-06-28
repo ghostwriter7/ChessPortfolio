@@ -14,8 +14,6 @@ export * from './events/game-ended.event';
 export * from './events/game-requested.event';
 export * from './events/game-started.event';
 export * from './events/log-created.event';
-export * from './events/opponent-refused.event';
-export * from './events/opponent-timeout.event';
 export * from './events/player-list-changed.event';
 export * from './events/player-joined.event';
 export * from './events/player-left.event';

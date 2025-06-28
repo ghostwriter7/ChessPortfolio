@@ -1,6 +1,7 @@
 import { loggerFactory } from '@api';
 import {
   ChallengePlayerCommand,
+  ChallengePlayerCommandPayload,
   LoginCommand,
   LoginCommandPayload,
   PlayerLeftEvent,
@@ -23,23 +24,20 @@ const server = createServer(app);
 const io = new Server(server);
 
 io.on('connection', (socket) => {
-  socket.on(LoginCommand.name, (payload: LoginCommandPayload) => {
-    const loginCommandHandler = new LoginCommandHandler(
-      socket,
-      playerRepository
-    );
-    if (loginCommandHandler.handle(payload)) {
-      const challengePlayerCommandHandler = new ChallengePlayerCommandHandler(
-        socket,
-        playerRepository
-      );
+  const loginCommandHandler = new LoginCommandHandler(socket, playerRepository);
+  socket.on(LoginCommand.name, (payload: LoginCommandPayload) =>
+    loginCommandHandler.handle(payload)
+  );
 
-      socket.on(
-        ChallengePlayerCommand.name,
-        challengePlayerCommandHandler.handle.bind(challengePlayerCommandHandler)
-      );
-    }
-  });
+  const challengePlayerCommandHandler = new ChallengePlayerCommandHandler(
+    socket,
+    playerRepository
+  );
+  socket.on(
+    ChallengePlayerCommand.name,
+    (payload: ChallengePlayerCommandPayload, ack) =>
+      challengePlayerCommandHandler.handle(payload, ack)
+  );
 
   socket.on('disconnect', async () => {
     const username = socket.data.username;

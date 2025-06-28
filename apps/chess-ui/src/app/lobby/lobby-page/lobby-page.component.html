@@ -3,6 +3,8 @@
   <p>Pick your opponent to start a game.</p>
 </header>
 
+<app-spinner />
+
 <main>
   <table class="opponents" mat-table [dataSource]="players()">
     <ng-container matColumnDef="index">
@@ -18,7 +20,7 @@
     <ng-container matColumnDef="action">
       <th *matHeaderCellDef mat-header-cell></th>
       <td mat-cell *matCellDef="let element">
-        <button mat-raised-button color="primary">Challenge</button>
+        <button mat-raised-button color="primary" (click)="challengePlayer(element.username)">Challenge</button>
       </td>
     </ng-container>
 

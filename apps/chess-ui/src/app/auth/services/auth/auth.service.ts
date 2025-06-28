@@ -16,6 +16,10 @@ export class AuthService {
   private readonly api = 'http://localhost:4201/api/auth';
   private readonly httpClient = inject(HttpClient);
 
+  public get token(): string | undefined {
+    return this.authResponse()?.token;
+  }
+
   constructor() {
     this.attemptToRefreshToken();
   }

@@ -4,8 +4,6 @@ import { PlayerRepository } from '../repository/player.repository';
 import {
   ChallengePlayerCommandPayload,
   GameRequestedEvent,
-  OpponentRefusedEvent,
-  OpponentTimeoutEvent,
   PlayersMatchedEvent,
 } from '@chess-logic';
 import { randomUUID } from 'node:crypto';
@@ -20,10 +18,19 @@ export class ChallengePlayerCommandHandler {
     private readonly playerRepository: PlayerRepository
   ) {}
 
-  public async handle(payload: ChallengePlayerCommandPayload): Promise<void> {
+  public async handle(
+    payload: ChallengePlayerCommandPayload,
+    ack: (result: { response: boolean; message?: string }) => void
+  ): Promise<void> {
+    const username = this.socket.data.username;
+
+    if (!username) {
+      this.logger.error('ChallengePlayerCommand emitted before authentication');
+      return;
+    }
+
     const opponent = payload?.opponent;
     const logger = this.logger;
-    const username = this.socket.data.username;
 
     if (!opponent) {
       logger.error('Invalid payload: opponent is missing');
@@ -43,6 +50,7 @@ export class ChallengePlayerCommandHandler {
         );
 
       if (result) {
+        ack({ response: true });
         const event = new PlayersMatchedEvent({
           gameId: randomUUID(),
           playerA: username,
@@ -52,11 +60,11 @@ export class ChallengePlayerCommandHandler {
         opponentSocket.emit(PlayersMatchedEvent.name, event);
         logger.info(`Players ${username} and ${opponent} matched for a game`);
       } else {
-        this.socket.emit(OpponentRefusedEvent.name);
+        ack({ response: false, message: 'Opponent refused your challenge.' });
         logger.info(`${opponent} refused the challenge from ${username}`);
       }
     } catch {
-      this.socket.emit(OpponentTimeoutEvent.name);
+      ack({ response: false, message: 'Opponent timed out.' });
       logger.error(
         `Timeout or failure when challenging ${opponent} by ${username}`
       );

@@ -4,10 +4,10 @@ import { Tokens } from '../../dtos/tokens';
 import { verifyToken } from '@api';
 
 export class JwtService {
-  public generateAuthTokens(userId: number): Tokens {
+  public generateAuthTokens(userId: number, username: string): Tokens {
     return {
-      accessToken: this.generateToken({ userId }, '1h'),
-      refreshToken: this.generateToken({ userId }, '7d'),
+      accessToken: this.generateToken({ userId, username }, '1h'),
+      refreshToken: this.generateToken({ userId, username }, '7d'),
     };
   }
 
