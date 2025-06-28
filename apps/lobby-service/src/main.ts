@@ -1,10 +1,10 @@
 import { loggerFactory } from '@api';
 import {
-  ChallengePlayerCommand,
+  CHALLENGE_PLAYER_COMMAND,
   ChallengePlayerCommandPayload,
-  LoginCommand,
+  LOGIN_COMMAND,
   LoginCommandPayload,
-  PlayerLeftEvent,
+  PLAYER_LEFT_EVENT,
 } from '@chess-logic';
 import express from 'express';
 import { createServer } from 'node:http';
@@ -25,7 +25,7 @@ const io = new Server(server);
 
 io.on('connection', (socket) => {
   const loginCommandHandler = new LoginCommandHandler(socket, playerRepository);
-  socket.on(LoginCommand.name, (payload: LoginCommandPayload) =>
+  socket.on(LOGIN_COMMAND, (payload: LoginCommandPayload) =>
     loginCommandHandler.handle(payload)
   );
 
@@ -34,7 +34,7 @@ io.on('connection', (socket) => {
     playerRepository
   );
   socket.on(
-    ChallengePlayerCommand.name,
+    CHALLENGE_PLAYER_COMMAND,
     (payload: ChallengePlayerCommandPayload, ack) =>
       challengePlayerCommandHandler.handle(payload, ack)
   );
@@ -43,7 +43,7 @@ io.on('connection', (socket) => {
     const username = socket.data.username;
     if (username) {
       playerRepository.deleteByUsername(username);
-      io.emit(PlayerLeftEvent.name, new PlayerLeftEvent({ username }));
+      io.emit(PLAYER_LEFT_EVENT, { username });
       logger.info(`${username} removed from the player list`);
     }
   });

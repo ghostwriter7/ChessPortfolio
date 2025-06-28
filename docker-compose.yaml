@@ -57,6 +57,8 @@ services:
       - ./libs:/app/libs
       - ./dist:/app/dist
       - /app/node_modules
+    env_file:
+      - .env
     environment:
       PORT: 4201
       BROKER_PORT: 9092

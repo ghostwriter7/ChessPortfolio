@@ -1,7 +1,7 @@
 import {
   LoginCommandPayload,
-  PlayerJoinedEvent,
-  PlayerListChangedEvent,
+  PLAYER_JOINED_EVENT,
+  PLAYER_LIST_CHANGED_EVENT,
 } from '@chess-logic';
 import { loggerFactory, verifyToken } from '@api';
 import { Socket } from 'socket.io';
@@ -49,14 +49,8 @@ export class LoginCommandHandler {
       socket.data.username = username;
       this.playerRepository.add(username, socket);
 
-      socket.broadcast.emit(
-        PlayerJoinedEvent.name,
-        new PlayerJoinedEvent({ username })
-      );
-      socket.emit(
-        PlayerListChangedEvent.name,
-        new PlayerListChangedEvent({ usernames })
-      );
+      socket.broadcast.emit(PLAYER_JOINED_EVENT, { username });
+      socket.emit(PLAYER_LIST_CHANGED_EVENT, { usernames });
     }
   }
 }

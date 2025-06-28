@@ -23,16 +23,16 @@ import { User } from '../../auth/model/user';
 import { MatButton } from '@angular/material/button';
 import { io } from 'socket.io-client';
 import {
-  ChallengePlayerCommand,
-  GameRequestedEvent,
+  CHALLENGE_PLAYER_COMMAND,
+  GAME_REQUESTED_EVENT,
   GameRequestedEventPayload,
-  LoginCommand,
-  PlayerJoinedEvent,
+  LOGIN_COMMAND,
+  PLAYER_JOINED_EVENT,
+  PLAYER_LEFT_EVENT,
+  PLAYER_LIST_CHANGED_EVENT,
   PlayerJoinedEventPayload,
-  PlayerLeftEvent,
-  PlayerListChangedEvent,
   PlayerListChangedEventPayload,
-  PlayersMatchedEvent,
+  PLAYERS_MATCHED_EVENT,
   PlayersMatchedEventPayload,
 } from '@chess-logic';
 import { AuthService } from '../../auth/services/auth/auth.service';
@@ -88,17 +88,17 @@ export class LobbyPageComponent implements OnInit, OnDestroy {
     if (!token) {
       throw new Error('Token is not set');
     }
-    this.socket.emit(LoginCommand.name, new LoginCommand({ token }));
+    this.socket.emit(LOGIN_COMMAND, { token });
 
     this.socket.on(
-      PlayerJoinedEvent.name,
+      PLAYER_JOINED_EVENT,
       ({ username }: PlayerJoinedEventPayload) => {
         this.players.update((players) => [...players, new User(username)]);
       }
     );
 
     this.socket.on(
-      PlayerLeftEvent.name,
+      PLAYER_LEFT_EVENT,
       ({ username }: PlayerJoinedEventPayload) => {
         this.players.update((players) =>
           players.filter((player) => player.username !== username)
@@ -107,14 +107,14 @@ export class LobbyPageComponent implements OnInit, OnDestroy {
     );
 
     this.socket.on(
-      PlayerListChangedEvent.name,
+      PLAYER_LIST_CHANGED_EVENT,
       ({ usernames }: PlayerListChangedEventPayload) => {
         this.players.set(usernames.map((player) => new User(player)));
       }
     );
 
     this.socket.on(
-      GameRequestedEvent.name,
+      GAME_REQUESTED_EVENT,
       (
         { opponent }: GameRequestedEventPayload,
         ack: (response: boolean) => void
@@ -127,7 +127,7 @@ export class LobbyPageComponent implements OnInit, OnDestroy {
     );
 
     this.socket.on(
-      PlayersMatchedEvent.name,
+      PLAYERS_MATCHED_EVENT,
       ({ gameId, playerA, playerB }: PlayersMatchedEventPayload) => {
         this.socket.disconnect();
         this.router.navigate(['/game', gameId], {
@@ -145,10 +145,10 @@ export class LobbyPageComponent implements OnInit, OnDestroy {
     try {
       const { response, message } = (await this.socket
         .timeout(20000)
-        .emitWithAck(
-          ChallengePlayerCommand.name,
-          new ChallengePlayerCommand({ opponent })
-        )) as { response: boolean; message?: string };
+        .emitWithAck(CHALLENGE_PLAYER_COMMAND, { opponent })) as {
+        response: boolean;
+        message?: string;
+      };
 
       alert(
         response

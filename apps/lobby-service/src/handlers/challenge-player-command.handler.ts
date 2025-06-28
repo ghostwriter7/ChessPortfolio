@@ -4,7 +4,8 @@ import { PlayerRepository } from '../repository/player.repository';
 import {
   ChallengePlayerCommandPayload,
   GameRequestedEvent,
-  PlayersMatchedEvent,
+  PLAYERS_MATCHED_EVENT,
+  PlayersMatchedEventPayload,
 } from '@chess-logic';
 import { randomUUID } from 'node:crypto';
 
@@ -51,13 +52,13 @@ export class ChallengePlayerCommandHandler {
 
       if (result) {
         ack({ response: true });
-        const event = new PlayersMatchedEvent({
+        const payload: PlayersMatchedEventPayload = {
           gameId: randomUUID(),
           playerA: username,
           playerB: opponent,
-        });
-        this.socket.emit(PlayersMatchedEvent.name, event);
-        opponentSocket.emit(PlayersMatchedEvent.name, event);
+        };
+        this.socket.emit(PLAYERS_MATCHED_EVENT, payload);
+        opponentSocket.emit(PLAYERS_MATCHED_EVENT, payload);
         logger.info(`Players ${username} and ${opponent} matched for a game`);
       } else {
         ack({ response: false, message: 'Opponent refused your challenge.' });
