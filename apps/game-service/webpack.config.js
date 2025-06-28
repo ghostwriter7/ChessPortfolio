@@ -10,7 +10,7 @@ module.exports = {
     new NxAppWebpackPlugin({
       target: 'node',
       compiler: 'tsc',
-      main: './src/index.ts',
+      main: './src/main.ts',
       tsConfig: './tsconfig.app.json',
       optimization: false,
       outputHashing: 'none',

@@ -11,7 +11,7 @@ export class Logger {
     this.logger.warn(message);
   }
 
-  public error(message: string): void {
-    this.logger.error(message);
+  public error(message: string, error?: unknown): void {
+    this.logger.error(message, error);
   }
 }

@@ -1,8 +1,7 @@
 import * as jwt from 'jsonwebtoken';
 import { type StringValue } from 'ms';
 import { Tokens } from '../../dtos/tokens';
-
-const JWT_SECRET = 'temp-secret-for-dev-work';
+import { verifyToken } from '@api';
 
 export class JwtService {
   public generateAuthTokens(userId: number): Tokens {
@@ -16,10 +15,10 @@ export class JwtService {
     payload: T,
     expiresIn: StringValue
   ): string {
-    return jwt.sign(payload, JWT_SECRET, { expiresIn });
+    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn });
   }
 
   public verifyToken<T extends object>(token: string): T {
-    return jwt.verify(token, JWT_SECRET) as T;
+    return verifyToken<T>(token);
   }
 }
