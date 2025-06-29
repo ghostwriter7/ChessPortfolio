@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -6,7 +7,7 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { MatButton } from '@angular/material/button';
 import {
   MatCell,
   MatCellDef,
@@ -19,9 +20,7 @@ import {
   MatRowDef,
   MatTable,
 } from '@angular/material/table';
-import { User } from '../../auth/model/user';
-import { MatButton } from '@angular/material/button';
-import { io } from 'socket.io-client';
+import { Router } from '@angular/router';
 import {
   CHALLENGE_PLAYER_COMMAND,
   GAME_REQUESTED_EVENT,
@@ -35,9 +34,10 @@ import {
   PLAYERS_MATCHED_EVENT,
   PlayersMatchedEventPayload,
 } from '@chess-logic';
+import { io } from 'socket.io-client';
+import { User } from '../../auth/model/user';
 import { AuthService } from '../../auth/services/auth/auth.service';
 import { SpinnerComponent } from '../../ui/spinner/spinner.component';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-lobby-page',
@@ -78,17 +78,17 @@ export class LobbyPageComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.socket.on('connect', () => {
       console.log('Connected');
+
+      const token = this.authService.token;
+      if (!token) {
+        throw new Error('Token is not set');
+      }
+      this.socket.emit(LOGIN_COMMAND, { token });
     });
 
     this.socket.on('disconnect', () => {
       console.log('Disconnected');
     });
-
-    const token = this.authService.token;
-    if (!token) {
-      throw new Error('Token is not set');
-    }
-    this.socket.emit(LOGIN_COMMAND, { token });
 
     this.socket.on(
       PLAYER_JOINED_EVENT,
