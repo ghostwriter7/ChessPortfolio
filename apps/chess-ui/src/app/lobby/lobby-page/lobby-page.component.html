@@ -1,30 +1,32 @@
-<header>
-  <h1>Lobby</h1>
-  <p>Pick your opponent to start a game.</p>
-</header>
+@if (hasNoOnlinePlayers()) {
+  <p>No online players available.</p>
+} @else {
+  <header>
+    <h1>Lobby</h1>
+    <p>Pick your opponent to start a game.</p>
+  </header>
 
-<app-spinner />
+  <main>
+    <table class="opponents" mat-table [dataSource]="players()">
+      <ng-container matColumnDef="index">
+        <th mat-header-cell *matHeaderCellDef>#</th>
+        <td mat-cell *matCellDef="let i = index">{{ i + 1 }}</td>
+      </ng-container>
 
-<main>
-  <table class="opponents" mat-table [dataSource]="players()">
-    <ng-container matColumnDef="index">
-      <th mat-header-cell *matHeaderCellDef>#</th>
-      <td mat-cell *matCellDef="let i = index">{{ i + 1 }}</td>
-    </ng-container>
+      <ng-container matColumnDef="username">
+        <th *matHeaderCellDef mat-header-cell>Username</th>
+        <td mat-cell *matCellDef="let element"> {{ element.username }}</td>
+      </ng-container>
 
-    <ng-container matColumnDef="username">
-      <th *matHeaderCellDef mat-header-cell>Username</th>
-      <td mat-cell *matCellDef="let element"> {{ element.username }}</td>
-    </ng-container>
+      <ng-container matColumnDef="action">
+        <th *matHeaderCellDef mat-header-cell></th>
+        <td mat-cell *matCellDef="let element">
+          <button mat-raised-button color="primary" (click)="challengePlayer(element.username)">Challenge</button>
+        </td>
+      </ng-container>
 
-    <ng-container matColumnDef="action">
-      <th *matHeaderCellDef mat-header-cell></th>
-      <td mat-cell *matCellDef="let element">
-        <button mat-raised-button color="primary" (click)="challengePlayer(element.username)">Challenge</button>
-      </td>
-    </ng-container>
-
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-  </table>
-</main>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </main>
+}

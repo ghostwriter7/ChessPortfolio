@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   OnDestroy,
   OnInit,
@@ -37,7 +38,6 @@ import {
 import { io } from 'socket.io-client';
 import { User } from '../../auth/model/user';
 import { AuthService } from '../../auth/services/auth/auth.service';
-import { SpinnerComponent } from '../../ui/spinner/spinner.component';
 
 @Component({
   selector: 'app-lobby-page',
@@ -54,15 +54,17 @@ import { SpinnerComponent } from '../../ui/spinner/spinner.component';
     MatRowDef,
     MatRow,
     MatButton,
-    SpinnerComponent,
   ],
   templateUrl: './lobby-page.component.html',
   styleUrl: './lobby-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LobbyPageComponent implements OnInit, OnDestroy {
+  protected readonly hasNoOnlinePlayers = computed(
+    () => this.players().length === 0
+  );
   protected readonly players = signal<User[]>([]);
-  protected readonly displayedColumns: Iterable<string> = [
+  protected readonly displayedColumns: string[] = [
     'index',
     'username',
     'action',

@@ -1,6 +1,6 @@
+import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
 import { AuthPageComponent } from './auth/auth-page/auth-page.component';
-import { inject } from '@angular/core';
 import { AuthService } from './auth/services/auth/auth.service';
 
 const authGuard = () => !!inject(AuthService).$user();
@@ -21,7 +21,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
-    path: 'game',
+    path: 'game/:gameId',
     loadComponent: () =>
       import('./game/game-page/game-page.component').then(
         (m) => m.GamePageComponent
