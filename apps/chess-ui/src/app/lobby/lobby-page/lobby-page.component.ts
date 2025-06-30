@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   inject,
   OnDestroy,
   OnInit,
@@ -38,6 +39,10 @@ import {
 import { io } from 'socket.io-client';
 import { User } from '../../auth/model/user';
 import { AuthService } from '../../auth/services/auth/auth.service';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmationPopupComponent } from '../../ui/confirmation-popup/confirmation-popup.component';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AlertPopupComponent } from '../../ui/alert-popup/alert-popup.component';
 
 @Component({
   selector: 'app-lobby-page',
@@ -71,6 +76,8 @@ export class LobbyPageComponent implements OnInit, OnDestroy {
   ];
 
   private readonly authService = inject(AuthService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly dialog = inject(MatDialog);
   private readonly socket = io('http://localhost:4204', {
     transports: ['websocket'],
     withCredentials: true,
@@ -121,10 +128,18 @@ export class LobbyPageComponent implements OnInit, OnDestroy {
         { opponent }: GameRequestedEventPayload,
         ack: (response: boolean) => void
       ) => {
-        const response = confirm(
-          `You are being challenged by ${opponent}. Do you want to accept?`
-        );
-        ack(response);
+        const dialogRef = this.dialog.open(ConfirmationPopupComponent, {
+          data: {
+            title: 'Challenge Requested',
+            message: `You are being challenged by ${opponent}. Do you want to accept?`,
+            confirmText: 'Yes',
+            cancelText: 'No',
+          },
+        });
+        dialogRef
+          .afterClosed()
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe(ack);
       }
     );
 
@@ -152,11 +167,14 @@ export class LobbyPageComponent implements OnInit, OnDestroy {
         message?: string;
       };
 
-      alert(
-        response
-          ? 'Challenge has been accepted. The game will start shortly.'
-          : message
-      );
+      this.dialog.open(AlertPopupComponent, {
+        data: {
+          title: 'Response',
+          message: response
+            ? 'Challenge has been accepted. The game will start shortly.'
+            : message,
+        },
+      });
     } catch (err) {
       alert('Network error');
       console.log(err);
