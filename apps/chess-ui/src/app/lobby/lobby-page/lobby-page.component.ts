@@ -176,8 +176,12 @@ export class LobbyPageComponent implements OnInit, OnDestroy {
         },
       });
     } catch (err) {
-      alert('Network error');
-      console.log(err);
+      this.dialog.open(AlertPopupComponent, {
+        data: {
+          title: 'Error',
+          message: 'Network Error',
+        },
+      });
     }
   }
 }

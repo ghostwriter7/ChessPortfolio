@@ -4,6 +4,8 @@ import { SignInFormValue, SignUpFormValue } from '../../model/form';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError, Observable, tap } from 'rxjs';
 import { AuthResponse } from '@api';
+import { MatDialog } from '@angular/material/dialog';
+import { AlertPopupComponent } from '../../../ui/alert-popup/alert-popup.component';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -14,6 +16,7 @@ export class AuthService {
   private readonly authResponse = signal<AuthResponse | null>(null);
 
   private readonly api = 'http://localhost:4201/api/auth';
+  private readonly dialog = inject(MatDialog);
   private readonly httpClient = inject(HttpClient);
 
   public get token(): string | undefined {
@@ -38,7 +41,15 @@ export class AuthService {
         withCredentials: true,
       })
       .pipe(
-        tap(() => alert('Check your e-mail')),
+        tap(() =>
+          this.dialog.open(AlertPopupComponent, {
+            data: {
+              title: 'Confirm Your Email',
+              message:
+                'Your account has been created, but is inactive. Please, go to your mailbox and confirm your account.',
+            },
+          })
+        ),
         catchError(this.handleError.bind(this))
       );
   }
