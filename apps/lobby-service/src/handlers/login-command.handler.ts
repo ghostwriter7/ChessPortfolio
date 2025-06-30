@@ -43,6 +43,16 @@ export class LoginCommandHandler {
     }
 
     if (username) {
+      const existingSocket =
+        this.playerRepository.getSocketByUsername(username);
+      if (existingSocket) {
+        logger.warn(
+          `Player ${username} tried to login again (existing socket disconnected).`
+        );
+        existingSocket.disconnect(true);
+        this.playerRepository.deleteByUsername(username);
+      }
+
       logger.info(`New player authenticated: ${username}`);
       const usernames = this.playerRepository.getUsernames();
 
