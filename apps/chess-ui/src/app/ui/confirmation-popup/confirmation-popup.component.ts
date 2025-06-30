@@ -29,15 +29,15 @@ export class ConfirmationPopupComponent {
   protected readonly confirmText: string;
   protected readonly cancelText: string;
 
-  constructor(
-    data = inject(MAT_DIALOG_DATA) as {
+  constructor() {
+    const { confirmText, cancelText, message, title } = inject(
+      MAT_DIALOG_DATA
+    ) as {
       message: string;
       title: string;
       confirmText: string;
       cancelText: string;
-    }
-  ) {
-    const { confirmText, cancelText, message, title } = data;
+    };
     this.confirmText = confirmText || 'Confirm';
     this.cancelText = cancelText || 'Cancel';
     this.title = title || 'Confirmation';

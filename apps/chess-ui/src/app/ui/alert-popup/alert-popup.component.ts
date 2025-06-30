@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { MatButton } from '@angular/material/button';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
@@ -7,7 +8,6 @@ import {
   MatDialogContent,
   MatDialogTitle,
 } from '@angular/material/dialog';
-import { MatButton } from '@angular/material/button';
 
 @Component({
   selector: 'app-alert-popup',
@@ -28,14 +28,12 @@ export class AlertPopupComponent {
   protected readonly message: string;
   protected readonly confirmText: string;
 
-  constructor(
-    data = inject(MAT_DIALOG_DATA) as {
+  constructor() {
+    const { confirmText, message, title } = inject(MAT_DIALOG_DATA) as {
       message: string;
       title: string;
       confirmText: string;
-    }
-  ) {
-    const { confirmText, message, title } = data;
+    };
     this.confirmText = confirmText || 'OK';
     this.title = title || 'Notification';
     this.message = message;
