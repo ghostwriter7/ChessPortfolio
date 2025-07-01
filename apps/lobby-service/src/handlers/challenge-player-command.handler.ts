@@ -1,6 +1,10 @@
 import { Socket } from 'socket.io';
-import { loggerFactory } from '@api';
-import { PlayerRepository } from '../repository/player.repository';
+import {
+  BrokerService,
+  loggerFactory,
+  PlayerRepository,
+  PLAYERS_MATCHED,
+} from '@api';
 import {
   ChallengePlayerCommandPayload,
   GAME_REQUESTED_EVENT,
@@ -16,7 +20,8 @@ export class ChallengePlayerCommandHandler {
 
   constructor(
     private readonly socket: Socket,
-    private readonly playerRepository: PlayerRepository
+    private readonly playerRepository: PlayerRepository,
+    private readonly broker: BrokerService
   ) {}
 
   public async handle(
@@ -48,14 +53,22 @@ export class ChallengePlayerCommandHandler {
         .emitWithAck(GAME_REQUESTED_EVENT, { opponent: username });
 
       if (result) {
-        ack({ response: true });
+        const gameId = randomUUID();
         const payload: PlayersMatchedEventPayload = {
-          gameId: randomUUID(),
+          gameId,
           playerA: username,
           playerB: opponent,
         };
         this.socket.emit(PLAYERS_MATCHED_EVENT, payload);
         opponentSocket.emit(PLAYERS_MATCHED_EVENT, payload);
+
+        await this.broker
+          .send(PLAYERS_MATCHED, gameId, payload)
+          .catch((e) =>
+            logger.error(`Failed to send ${PLAYERS_MATCHED} event to Kafka`, e)
+          );
+
+        ack({ response: true });
         logger.info(`Players ${username} and ${opponent} matched for a game`);
       } else {
         ack({ response: false, message: 'Opponent refused your challenge.' });

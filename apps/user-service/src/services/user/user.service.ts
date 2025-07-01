@@ -14,7 +14,7 @@ import { UnauthorizedException } from '../../exceptions/unauthorized-exception';
 import { PasswordHelper } from '../../helpers/password.helper';
 import { User } from '../../model/user';
 import { UserRepository } from '../../user-repository';
-import { BrokerService } from '../broker/broker.service';
+import { BrokerService } from '@api';
 import { JwtService } from '../jwt/jwt.service';
 
 export class UserService {

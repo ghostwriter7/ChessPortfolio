@@ -13,7 +13,7 @@ import { User } from '../../model/user';
 import * as jwt from 'jsonwebtoken';
 import { SqlException } from '../../exceptions/sql-exception';
 import { ForbiddenException } from '../../exceptions/forbidden-exception';
-import { BrokerService } from '../broker/broker.service';
+import { BrokerService } from '@api';
 
 describe('UserService', () => {
   let userService: UserService;

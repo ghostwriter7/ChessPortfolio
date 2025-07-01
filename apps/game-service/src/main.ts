@@ -2,25 +2,71 @@ import {
   JoinGameCommand,
   JoinGameCommandPayload,
   LogCreatedEvent,
+  LOGIN_COMMAND,
+  LoginCommandPayload,
 } from '@chess-logic';
 import express from 'express';
 import { createServer } from 'node:http';
 import { Server, Socket } from 'socket.io';
 import { Game } from './models/game';
 import { GameManager } from './services/game-manager';
+import {
+  createSubscriberService,
+  DefaultLoginCommandHandler,
+  loggerFactory,
+  PlayerRepository,
+  PLAYERS_MATCHED,
+  PlayersMatchedPayload,
+} from '@api';
+import { GameRepository } from './repository/game.repository';
 
 const PORT = process.env.PORT;
 
 const app = express();
 const server = createServer(app);
 const io = new Server(server);
+const logger = loggerFactory();
+const gameRepository = new GameRepository();
+
+const subscriberService = await createSubscriberService();
+await subscriberService.subscribe(PLAYERS_MATCHED);
+await subscriberService.run(async ({ topic, message, partition }) => {
+  logger.info(`Received message from ${topic} [${partition}]`);
+
+  try {
+    const { gameId, playerA, playerB } = JSON.parse(
+      message.value.toString()
+    ) as PlayersMatchedPayload;
+
+    if (gameId && playerA && playerB) {
+      const white = Math.random() > 0.5 ? playerA : playerB;
+      const black = white === playerA ? playerB : playerA;
+      gameRepository.addGame(gameId, { white, black });
+      logger.info(
+        `Game ${gameId} created for players ${white} (white) and ${black} (black)`
+      );
+    }
+  } catch (e) {
+    logger.error(`Failed to handle ${PLAYERS_MATCHED} event`, e);
+  }
+});
 
 const waitingPlayers: Socket[] = [];
 const gameIdToGameManagers = new Map<string, GameManager>();
 const socketToGameId = new Map<string, string>();
 
+const playerRepository = new PlayerRepository();
+
 io.on('connection', (socket) => {
-  console.log('New connection');
+  logger.info('New connection');
+
+  const loginCommandHandler = new DefaultLoginCommandHandler(
+    socket,
+    playerRepository
+  );
+  socket.on(LOGIN_COMMAND, (payload: LoginCommandPayload) =>
+    loginCommandHandler.handle(payload)
+  );
 
   socket.on(
     JoinGameCommand.name,

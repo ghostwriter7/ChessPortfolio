@@ -3,64 +3,31 @@ import {
   PLAYER_JOINED_EVENT,
   PLAYER_LIST_CHANGED_EVENT,
 } from '@chess-logic';
-import { loggerFactory, verifyToken } from '@api';
+import {
+  DefaultLoginCommandHandler,
+  loggerFactory,
+  PlayerRepository,
+} from '@api';
 import { Socket } from 'socket.io';
-import { PlayerRepository } from '../repository/player.repository';
 
-export class LoginCommandHandler {
-  private readonly logger = loggerFactory({
+export class LoginCommandHandler extends DefaultLoginCommandHandler {
+  protected override readonly logger = loggerFactory({
     service: LoginCommandHandler.name,
   });
 
-  constructor(
-    private readonly socket: Socket,
-    private readonly playerRepository: PlayerRepository
-  ) {}
+  constructor(socket: Socket, playerRepository: PlayerRepository) {
+    super(socket, playerRepository);
+  }
 
-  public handle(payload: LoginCommandPayload): void {
-    const logger = this.logger;
+  public override handle(payload: LoginCommandPayload): boolean {
+    if (!super.handle(payload)) return false;
+
+    const usernames = this.playerRepository.getUsernames();
+
     const socket = this.socket;
-
-    const token = payload?.token;
-
-    if (!token) {
-      socket.disconnect(true);
-      logger.error('A player tried to login without a token (disconnected).');
-      return;
-    }
-
-    let username: string;
-
-    try {
-      username = verifyToken<{ username: string }>(token)?.username;
-    } catch (e) {
-      socket.disconnect(true);
-      logger.error(
-        `A player's auth token does not contain username property (disconnected).`,
-        e
-      );
-      return;
-    }
-
-    if (username) {
-      const existingSocket =
-        this.playerRepository.getSocketByUsername(username);
-      if (existingSocket) {
-        logger.warn(
-          `Player ${username} tried to login again (existing socket disconnected).`
-        );
-        existingSocket.disconnect(true);
-        this.playerRepository.deleteByUsername(username);
-      }
-
-      logger.info(`New player authenticated: ${username}`);
-      const usernames = this.playerRepository.getUsernames();
-
-      socket.data.username = username;
-      this.playerRepository.add(username, socket);
-
-      socket.broadcast.emit(PLAYER_JOINED_EVENT, { username });
-      socket.emit(PLAYER_LIST_CHANGED_EVENT, { usernames });
-    }
+    const username = socket.data.username;
+    socket.broadcast.emit(PLAYER_JOINED_EVENT, { username });
+    socket.emit(PLAYER_LIST_CHANGED_EVENT, { usernames });
+    return true;
   }
 }

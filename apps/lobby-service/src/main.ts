@@ -1,4 +1,4 @@
-import { loggerFactory } from '@api';
+import { createBrokerService, loggerFactory, PlayerRepository } from '@api';
 import {
   CHALLENGE_PLAYER_COMMAND,
   ChallengePlayerCommandPayload,
@@ -10,12 +10,12 @@ import express from 'express';
 import { createServer } from 'node:http';
 import { Server } from 'socket.io';
 import { LoginCommandHandler } from './handlers/login-command.handler';
-import { PlayerRepository } from './repository/player.repository';
 import { ChallengePlayerCommandHandler } from './handlers/challenge-player-command.handler';
 
 const logger = loggerFactory();
 
 const playerRepository = new PlayerRepository();
+const broker = await createBrokerService();
 
 const PORT = process.env.PORT;
 
@@ -31,7 +31,8 @@ io.on('connection', (socket) => {
 
   const challengePlayerCommandHandler = new ChallengePlayerCommandHandler(
     socket,
-    playerRepository
+    playerRepository,
+    broker
   );
   socket.on(
     CHALLENGE_PLAYER_COMMAND,

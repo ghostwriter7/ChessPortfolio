@@ -14,3 +14,7 @@ export * from './logger/logger-factory';
 export * from './logger/logging-middleware';
 
 export * from './jwt/verify-token';
+
+export * from './repository/player.repository';
+
+export * from './handlers/default-login-command.handler';

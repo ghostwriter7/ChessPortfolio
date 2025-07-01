@@ -1,5 +1,6 @@
 import {
   AuthResponse,
+  createBrokerService,
   CreateUserRequest,
   ErrorResponse,
   SignInRequest,
@@ -10,13 +11,12 @@ import { UserService } from './services/user/user.service';
 import { UserRepository } from './user-repository';
 import { JwtService } from './services/jwt/jwt.service';
 import { TokensWithUsername } from './dtos/tokens';
-import { BrokerService } from './services/broker/broker.service';
 
 const router = Router();
 const jwtService = new JwtService();
 const userRepository = new UserRepository(pool);
-const broker = new BrokerService();
-await broker.init();
+const broker = await createBrokerService();
+
 const userService = new UserService(userRepository, jwtService, broker);
 
 const aWeek = 24 * 60 * 60 * 1000 * 7;
