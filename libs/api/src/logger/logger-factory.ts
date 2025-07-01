@@ -1,7 +1,7 @@
 import { createLogger, format, transports } from 'winston';
 import { Logger } from './logger';
 
-const { combine, timestamp, label, printf } = format;
+const { combine, timestamp, label, printf, colorize } = format;
 
 const logFormat = printf(
   ({ level, message, label, timestamp }) =>
@@ -15,7 +15,12 @@ export function loggerFactory(params?: {
   const { service = 'Root', level = 'info' } = params ?? {};
   const logger = createLogger({
     level: level,
-    format: combine(label({ label: service }), timestamp(), logFormat),
+    format: combine(
+      colorize({ all: true }),
+      label({ label: service }),
+      timestamp(),
+      logFormat
+    ),
     defaultMeta: { service },
     transports: [new transports.Console()],
   });
