@@ -5,6 +5,8 @@ export * from './auth/username.type';
 export * from './error/error-response';
 export * from './error/retry';
 
+export * from './events/broker/broker.service';
+export * from './events/broker/subscriber.service';
 export * from './events/events';
 
 export * from './logger/logger';
