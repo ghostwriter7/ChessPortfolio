@@ -62,7 +62,7 @@ services:
       - .env
     environment:
       PORT: 4201
-      BROKER_PORT: 9092
+      SERVICE_NAME: user-srv
     depends_on:
       - mysql
       - broker
@@ -80,8 +80,11 @@ services:
       - ./libs:/app/libs
       - ./dist:/app/dist
       - /app/node_modules
+    env_file:
+      - .env
     environment:
       PORT: 4202
+      SERVICE_NAME: game-srv
 
   notification-srv:
     container_name: notification-srv
@@ -99,6 +102,7 @@ services:
       - .env
     environment:
       BROKER_PORT: 9092
+      SERVICE_NAME: notification-srv
     depends_on:
       - broker
 
@@ -119,6 +123,7 @@ services:
       - .env
     environment:
       PORT: 4204
+      SERVICE_NAME: lobby-srv
 
   chess-ui-builder:
     container_name: chess-ui-builder
