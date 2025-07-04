@@ -1,8 +1,11 @@
-type GameId = string;
+import { Username } from '@api';
 
-type GameMetadata = {
-  white: string;
-  black: string;
+export type GameId = string;
+
+export type GameMetadata = {
+  gameId: GameId;
+  black: Username;
+  white: Username;
 };
 
 export class GameRepository {

@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -8,20 +9,23 @@ import {
   Signal,
   signal,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { MatButton } from '@angular/material/button';
+import {
+  GAME_ENDED_EVENT,
+  GAME_STARTED_EVENT,
+  getOppositeColor,
+  JOIN_GAME_COMMAND,
+  LEAVE_GAME_COMMAND,
+  LOGIN_COMMAND,
+} from '@chess-logic';
+import { AuthService } from '../../auth/services/auth/auth.service';
 import { ChessBoard } from '../../components/chess-board/chess-board.component';
 import { GameLogs } from '../../components/game-logs/game-logs.component';
-import { MatButton } from '@angular/material/button';
-import { Player } from '../../types/player';
-import { GameStateStore } from '../../services/game-state-store/game-state-store';
 import { GameMediator } from '../../services/game-mediator/game-mediator';
-import {
-  GameEndedEvent,
-  GameStartedEvent,
-  getOppositeColor,
-  JoinGameCommand,
-  LeaveGameCommand,
-} from '@chess-logic';
+import { GameStateStore } from '../../services/game-state-store/game-state-store';
+import { Player } from '../../types/player';
+import { MatDialog } from '@angular/material/dialog';
+import { AlertPopupComponent } from '../../ui/alert-popup/alert-popup.component';
 
 @Component({
   selector: 'app-game-page',
@@ -31,7 +35,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GamePageComponent implements OnInit {
-  public username = input.required<string>();
+  public gameId = input.required<string>();
 
   protected readonly gameStarted = signal(false);
   protected readonly isAnonymous = computed(
@@ -42,6 +46,8 @@ export class GamePageComponent implements OnInit {
     () => this.gameStateStore.$opponent()?.name
   );
 
+  private readonly authService = inject(AuthService);
+  private readonly dialog = inject(MatDialog);
   private readonly gameStateStore = inject(GameStateStore);
   private readonly gameMediator = inject(GameMediator);
 
@@ -50,44 +56,55 @@ export class GamePageComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    this.joinGame(this.username());
+    const token = this.authService.token;
+    const username = this.authService.$user();
 
-    this.gameMediator.subscribe(GameStartedEvent, ({ payload }) => {
+    if (token && username) {
+      this.gameMediator.dispatch(LOGIN_COMMAND, { token });
+
+      this.gameMediator.dispatch(
+        JOIN_GAME_COMMAND,
+        { gameId: this.gameId() },
+        10000,
+        (err: unknown) => {
+          if (err) {
+            this.dialog.open(AlertPopupComponent, {
+              data: {
+                title: 'Error',
+                message:
+                  typeof err === 'string' ? err : 'Internal Server Error',
+              },
+            });
+          } else {
+            this.gameStateStore.setPlayerName(username);
+          }
+        }
+      );
+    }
+
+    this.gameMediator.subscribe(GAME_STARTED_EVENT, ({ white, black }) => {
       const playerName = this.gameStateStore.$player()?.name;
-      const playerColor = playerName === payload.white ? 'white' : 'black';
+      const playerColor = playerName === white ? 'white' : 'black';
+      const opponentName = playerName === white ? black : white;
       const opponentColor = getOppositeColor(playerColor);
 
       this.gameStateStore.setPlayerColor(playerColor);
-      this.gameStateStore.setOpponent(payload[opponentColor], opponentColor);
+      this.gameStateStore.setOpponent(opponentName, opponentColor);
       this.gameStateStore.initializeBoard(playerColor);
 
       if (playerColor === 'white') this.gameStateStore.setPlayerTurn();
       this.gameStarted.set(true);
     });
 
-    this.gameMediator.subscribe(GameEndedEvent, () => {
+    this.gameMediator.subscribe(GAME_ENDED_EVENT, () => {
       this.gameStarted.set(false);
     });
   }
 
-  protected joinGame(name: string): void {
-    this.gameMediator.dispatch(
-      new JoinGameCommand({ name }),
-      5000,
-      (err: unknown) => {
-        if (err) {
-          alert(err);
-        } else {
-          this.gameStateStore.setPlayerName(name);
-        }
-      }
-    );
-  }
-
   protected leaveGame(): void {
-    this.gameMediator.dispatch(
-      new LeaveGameCommand({ reason: 'User clicked leave button' })
-    );
+    this.gameMediator.dispatch(LEAVE_GAME_COMMAND, {
+      reason: 'User clicked leave button',
+    });
     this.gameStarted.set(false);
   }
 }

@@ -1,14 +1,14 @@
 import {
-  JoinGameCommand,
+  JOIN_GAME_COMMAND,
+  JoinGameCommandCallback,
   JoinGameCommandPayload,
-  LogCreatedEvent,
+  LOG_CREATED_EVENT,
   LOGIN_COMMAND,
   LoginCommandPayload,
 } from '@chess-logic';
 import express from 'express';
 import { createServer } from 'node:http';
-import { Server, Socket } from 'socket.io';
-import { Game } from './models/game';
+import { Server } from 'socket.io';
 import { GameManager } from './services/game-manager';
 import {
   createSubscriberService,
@@ -18,7 +18,11 @@ import {
   PLAYERS_MATCHED,
   PlayersMatchedPayload,
 } from '@api';
-import { GameRepository } from './repository/game.repository';
+import {
+  GameId,
+  GameMetadata,
+  GameRepository,
+} from './repository/game.repository';
 
 const PORT = process.env.PORT;
 
@@ -41,7 +45,7 @@ await subscriberService.run(async ({ topic, message, partition }) => {
     if (gameId && playerA && playerB) {
       const white = Math.random() > 0.5 ? playerA : playerB;
       const black = white === playerA ? playerB : playerA;
-      gameRepository.addGame(gameId, { white, black });
+      gameRepository.addGame(gameId, { gameId, white, black });
       logger.info(
         `Game ${gameId} created for players ${white} (white) and ${black} (black)`
       );
@@ -51,9 +55,8 @@ await subscriberService.run(async ({ topic, message, partition }) => {
   }
 });
 
-const waitingPlayers: Socket[] = [];
-const gameIdToGameManagers = new Map<string, GameManager>();
-const socketToGameId = new Map<string, string>();
+const gameIdToGameManagers = new Map<GameId, GameManager>();
+const socketToGameId = new Map<string, GameId>();
 
 const playerRepository = new PlayerRepository();
 
@@ -69,38 +72,48 @@ io.on('connection', (socket) => {
   );
 
   socket.on(
-    JoinGameCommand.name,
-    ({ name }: JoinGameCommandPayload, callback) => {
-      console.log(name);
-      socket.data.username = name;
+    JOIN_GAME_COMMAND,
+    async (
+      { gameId }: JoinGameCommandPayload,
+      callback: JoinGameCommandCallback
+    ) => {
+      const { username } = socket.data;
 
-      if (waitingPlayers.length === 0) {
-        waitingPlayers.push(socket);
+      if (!username) {
+        callback('You must be logged in to join a game', 'AUTH_ERROR');
+        return;
+      }
+
+      let game: GameMetadata;
+      for (let i = 0; i < 3; i++) {
+        game = gameRepository.getGameById(gameId);
+
+        if (game) break;
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        logger.info(`Game ${gameId} not found, retrying in 1s...`);
+      }
+
+      if (!game) {
+        logger.error(`Game ${gameId} not found`);
+        callback('Game not found', 'GAME_NOT_FOUND');
+        return;
+      }
+
+      const color = game.white === username ? 'white' : 'black';
+      socketToGameId.set(socket.id, gameId);
+
+      if (!gameIdToGameManagers.has(gameId)) {
+        const newGameManager = new GameManager(gameId, io);
+        gameIdToGameManagers.set(gameId, newGameManager);
+        newGameManager.setSocket(color, socket);
         socket.emit(
-          LogCreatedEvent.name,
-          new LogCreatedEvent('Waiting for another player...')
+          LOG_CREATED_EVENT,
+          'Game is about to start, waiting for your opponent to join...'
         );
-        callback();
       } else {
-        callback();
-        socket.emit(
-          LogCreatedEvent.name,
-          new LogCreatedEvent('Game is about to begin...')
-        );
-        const opponent = waitingPlayers.shift()!;
-
-        const white = Math.random() > 0.5 ? socket : opponent;
-        const black = white === socket ? opponent : socket;
-
-        const game = new Game(white, black);
-        const gameManager = new GameManager(game, io);
-        const { gameId } = game;
-        gameIdToGameManagers.set(gameId, gameManager);
-
+        const gameManager = gameIdToGameManagers.get(gameId);
+        gameManager.setSocket(color, socket);
         gameManager.startGame();
-
-        socketToGameId.set(socket.id, gameId);
-        socketToGameId.set(opponent.id, gameId);
       }
     }
   );
