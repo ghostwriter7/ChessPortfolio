@@ -45,6 +45,7 @@ export class GamePageComponent implements OnInit {
   protected readonly opponentName = computed(
     () => this.gameStateStore.$opponent()?.name
   );
+  protected readonly username: Signal<string | undefined>;
 
   private readonly authService = inject(AuthService);
   private readonly dialog = inject(MatDialog);
@@ -53,6 +54,7 @@ export class GamePageComponent implements OnInit {
 
   constructor() {
     this.player = this.gameStateStore.$player;
+    this.username = this.authService.$user;
   }
 
   public ngOnInit(): void {

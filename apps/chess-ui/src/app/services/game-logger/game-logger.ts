@@ -7,7 +7,11 @@ import {
 } from '@angular/core';
 import { Log } from '../../models/log';
 import { GameMediator } from '../game-mediator/game-mediator';
-import { LogCreatedEvent, pieceNames } from '@chess-logic';
+import {
+  LOG_CREATED_EVENT,
+  LogCreatedEventPayload,
+  pieceNames,
+} from '@chess-logic';
 import { GameStateStore } from '../game-state-store/game-state-store';
 import { DomSanitizer } from '@angular/platform-browser';
 
@@ -24,12 +28,12 @@ export class GameLogger {
     this.$logs = this.logs.asReadonly();
 
     this.gameMediator.subscribe(
-      LogCreatedEvent,
-      ({ payload, createdAt }: LogCreatedEvent): void => {
+      LOG_CREATED_EVENT,
+      (message: LogCreatedEventPayload): void => {
         const player = this.gameStateStore.$player();
         const opponent = this.gameStateStore.$opponent();
 
-        let formattedMessage = payload;
+        let formattedMessage = message;
 
         if (player?.name && formattedMessage.includes(player.name)) {
           formattedMessage = formattedMessage.replace(
@@ -71,7 +75,7 @@ export class GameLogger {
         );
 
         if (sanitizedFormattedMessage) {
-          this.log(new Log(sanitizedFormattedMessage, createdAt));
+          this.log(new Log(sanitizedFormattedMessage));
         }
       }
     );

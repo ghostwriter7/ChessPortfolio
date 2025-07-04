@@ -1,11 +1,12 @@
 import { computed, inject, Injectable, Signal, signal } from '@angular/core';
 import {
   Board,
-  BoardUpdatedEvent,
+  BOARD_UPDATED_EVENT,
+  BoardUpdatedEventPayload,
   Color,
   getAvailablePositions,
   Letter,
-  MakeMoveCommand,
+  MAKE_MOVE_COMMAND,
   Position,
   RowNumber,
   UntouchedBoard,
@@ -52,7 +53,7 @@ export class GameStateStore {
     this.$opponent = this.opponent.asReadonly();
 
     this.gameMediator.subscribe(
-      BoardUpdatedEvent,
+      BOARD_UPDATED_EVENT,
       this.handleBoardUpdatedEvent.bind(this)
     );
   }
@@ -87,8 +88,7 @@ export class GameStateStore {
     this.rows.set(playerColor === 'white' ? rows.reverse() : rows);
   }
 
-  public handleBoardUpdatedEvent(boardUpdatedEvent: BoardUpdatedEvent): void {
-    const boardUpdate = boardUpdatedEvent.payload;
+  public handleBoardUpdatedEvent(boardUpdate: BoardUpdatedEventPayload): void {
     this.board.update((board) => ({ ...board, ...boardUpdate }));
     this.highlightedPositions.set(null);
     this.selectedPosition.set(null);
@@ -108,11 +108,10 @@ export class GameStateStore {
       });
 
       if (availablePositions.includes(position)) {
-        const makeMoveCommand = new MakeMoveCommand({
+        this.gameMediator.dispatch(MAKE_MOVE_COMMAND, {
           from: currentSelectedPosition,
           to: position,
         });
-        this.gameMediator.dispatch(makeMoveCommand);
         this.highlightedPositions.set(null);
         this.selectedPosition.set(null);
         return;
