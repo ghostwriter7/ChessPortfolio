@@ -15,8 +15,10 @@ import {
 import { Server, Socket } from 'socket.io';
 import { MakeMoveCommandValidator } from '../validators/make-move-command.validator';
 import { GameId } from '../repository/game.repository';
+import { loggerFactory } from '@api';
 
 export class GameManager {
+  private readonly logger = loggerFactory({ service: GameManager.name });
   private readonly players = new Map<Color, Socket>();
 
   private activeColor: Color = 'white';
@@ -76,7 +78,7 @@ export class GameManager {
         `The game has started! ${whiteName} vs ${blackName}. Fight!`
       );
 
-    console.log(
+    this.logger.info(
       `Game started: ${gameId} between ${whiteName} and ${blackName}`
     );
 

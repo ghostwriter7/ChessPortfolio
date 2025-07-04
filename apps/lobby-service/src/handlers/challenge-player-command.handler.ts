@@ -70,6 +70,9 @@ export class ChallengePlayerCommandHandler {
 
         ack({ response: true });
         logger.info(`Players ${username} and ${opponent} matched for a game`);
+
+        this.socket.disconnect();
+        opponentSocket.disconnect();
       } else {
         ack({ response: false, message: 'Opponent refused your challenge.' });
         logger.info(`${opponent} refused the challenge from ${username}`);

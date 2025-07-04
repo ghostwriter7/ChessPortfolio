@@ -22,7 +22,9 @@ export class LoginCommandHandler extends DefaultLoginCommandHandler {
   public override handle(payload: LoginCommandPayload): boolean {
     if (!super.handle(payload)) return false;
 
-    const usernames = this.playerRepository.getUsernames();
+    const usernames = this.playerRepository
+      .getUsernames()
+      .filter((username) => username !== this.socket.data.username);
 
     const socket = this.socket;
     const username = socket.data.username;

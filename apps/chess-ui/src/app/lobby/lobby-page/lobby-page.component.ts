@@ -145,12 +145,8 @@ export class LobbyPageComponent implements OnInit, OnDestroy {
 
     this.socket.on(
       PLAYERS_MATCHED_EVENT,
-      ({ gameId, playerA, playerB }: PlayersMatchedEventPayload) => {
-        this.socket.disconnect();
-        this.router.navigate(['/game', gameId], {
-          queryParams: { playerA, playerB },
-        });
-      }
+      ({ gameId }: PlayersMatchedEventPayload) =>
+        this.router.navigate(['/game', gameId])
     );
   }
 

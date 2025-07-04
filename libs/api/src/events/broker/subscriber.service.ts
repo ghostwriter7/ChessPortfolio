@@ -24,6 +24,9 @@ export class SubscriberService {
       brokers: [`broker:${BROKER_PORT}`],
     });
     this.consumer = kafka.consumer({ groupId: clientId });
+    this.logger.info(
+      `Consumer has been successfully created for groupId: ${clientId}`
+    );
   }
 
   public async tryInit(): Promise<void> {

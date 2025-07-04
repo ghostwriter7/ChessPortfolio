@@ -119,7 +119,7 @@ io.on('connection', (socket) => {
   );
 
   socket.on('disconnect', () => {
-    console.log(`${socket.data.username} disconnected`);
+    logger.info(`${socket.data.username} disconnected`);
 
     const gameId = socketToGameId.get(socket.id);
 
@@ -134,16 +134,13 @@ io.on('connection', (socket) => {
       gameIdToGameManagers.delete(gameId);
       gameManager.destroy();
 
-      console.log(`Game ended: ${gameId}}`);
-    } else {
-      const index = waitingPlayers.findIndex(({ id }) => id === socket.id);
-      if (index !== -1) {
-        waitingPlayers.splice(index, 1);
-      }
+      logger.info(
+        `Game ended: ${gameId}} due to ${socket.data.username} disconnect`
+      );
     }
   });
 });
 
 server.listen(PORT, () => {
-  console.log(`Game-Service is running on port ${PORT}`);
+  logger.info(`Game-Service is running on port ${PORT}`);
 });
