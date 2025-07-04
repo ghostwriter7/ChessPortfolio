@@ -112,6 +112,7 @@ io.on('connection', (socket) => {
           LOG_CREATED_EVENT,
           'Game is about to start, waiting for your opponent to join...'
         );
+        callback('OK', null);
       } else {
         const gameManager = gameIdToGameManagers.get(gameId);
         gameManager.setSocket(color, socket);
