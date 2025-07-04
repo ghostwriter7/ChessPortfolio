@@ -12,7 +12,7 @@ export function loggerFactory(params?: {
   service?: string;
   level?: string;
 }): Logger {
-  const { service = 'Root', level = 'info' } = params ?? {};
+  const { service = 'Root', level = 'debug' } = params ?? {};
   const logger = createLogger({
     level: level,
     format: combine(

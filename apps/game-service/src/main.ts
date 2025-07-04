@@ -103,9 +103,11 @@ io.on('connection', (socket) => {
       socketToGameId.set(socket.id, gameId);
 
       if (!gameIdToGameManagers.has(gameId)) {
+        logger.debug(`GameManager for game ${gameId} created`);
         const newGameManager = new GameManager(gameId, io);
         gameIdToGameManagers.set(gameId, newGameManager);
         newGameManager.setSocket(color, socket);
+        logger.debug(`${username} joined game ${gameId} as ${color} first.`);
         socket.emit(
           LOG_CREATED_EVENT,
           'Game is about to start, waiting for your opponent to join...'
@@ -113,6 +115,8 @@ io.on('connection', (socket) => {
       } else {
         const gameManager = gameIdToGameManagers.get(gameId);
         gameManager.setSocket(color, socket);
+        logger.debug(`${username} joined game ${gameId} as ${color} second.`);
+        callback('OK', null);
         gameManager.startGame();
       }
     }

@@ -3,6 +3,10 @@ export const LOGIN_COMMAND = 'LOGIN';
 
 export type LoginCommandPayload = { token: string };
 export type ChallengePlayerCommandPayload = { opponent: string };
+export type ChallengePlayerCommandCallback = (result: {
+  response: boolean;
+  message?: string;
+}) => void;
 
 export type LobbyCommand =
   | typeof CHALLENGE_PLAYER_COMMAND

@@ -14,4 +14,8 @@ export class Logger {
   public error(message: string, error?: unknown): void {
     this.logger.error(message, error);
   }
+
+  public debug(message: string): void {
+    this.logger.debug(message);
+  }
 }

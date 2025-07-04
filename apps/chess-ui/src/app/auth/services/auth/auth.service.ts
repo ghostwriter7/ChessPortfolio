@@ -11,7 +11,7 @@ import { AlertPopupComponent } from '../../../ui/alert-popup/alert-popup.compone
 export class AuthService {
   public readonly $user = computed(() => this.authResponse()?.username);
   private readonly router = inject(Router);
-  private readonly refreshTokenInMs = 1000 * 55;
+  private readonly refreshTokenInMs = 15 * 1000 * 60;
 
   private readonly authResponse = signal<AuthResponse | null>(null);
 

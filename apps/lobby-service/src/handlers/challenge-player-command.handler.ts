@@ -6,6 +6,7 @@ import {
   PLAYERS_MATCHED,
 } from '@api';
 import {
+  ChallengePlayerCommandCallback,
   ChallengePlayerCommandPayload,
   GAME_REQUESTED_EVENT,
   PLAYERS_MATCHED_EVENT,
@@ -26,7 +27,7 @@ export class ChallengePlayerCommandHandler {
 
   public async handle(
     payload: ChallengePlayerCommandPayload,
-    ack: (result: { response: boolean; message?: string }) => void
+    ack: ChallengePlayerCommandCallback
   ): Promise<void> {
     const username = this.socket.data.username;
     const logger = this.logger;

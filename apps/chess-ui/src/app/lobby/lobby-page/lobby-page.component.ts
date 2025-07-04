@@ -25,6 +25,7 @@ import {
 import { Router } from '@angular/router';
 import {
   CHALLENGE_PLAYER_COMMAND,
+  ChallengePlayerCommandCallback,
   GAME_REQUESTED_EVENT,
   GameRequestedEventPayload,
   LOGIN_COMMAND,
@@ -158,10 +159,9 @@ export class LobbyPageComponent implements OnInit, OnDestroy {
     try {
       const { response, message } = (await this.socket
         .timeout(20000)
-        .emitWithAck(CHALLENGE_PLAYER_COMMAND, { opponent })) as {
-        response: boolean;
-        message?: string;
-      };
+        .emitWithAck(CHALLENGE_PLAYER_COMMAND, {
+          opponent,
+        })) as Parameters<ChallengePlayerCommandCallback>[0];
 
       this.dialog.open(AlertPopupComponent, {
         data: {
