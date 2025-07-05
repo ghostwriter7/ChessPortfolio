@@ -98,7 +98,13 @@ export class GamePageComponent implements OnInit {
       this.gameStarted.set(true);
     });
 
-    this.gameMediator.subscribe(GAME_ENDED_EVENT, () => {
+    this.gameMediator.subscribe(GAME_ENDED_EVENT, (message) => {
+      this.dialog.open(AlertPopupComponent, {
+        data: {
+          title: 'Checkmate!',
+          message,
+        },
+      });
       this.gameStarted.set(false);
     });
   }

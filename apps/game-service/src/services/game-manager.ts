@@ -105,7 +105,7 @@ export class GameManager {
         const playerName = player.data.username;
         this.notifyOpponentAboutPlayerLeave(opponent, playerName);
 
-        console.log(`Game ended: ${gameId}`);
+        this.logger.info(`Game ended: ${gameId}`);
         player.disconnect(true);
         opponent.disconnect(true);
         this.destroy();
@@ -131,14 +131,14 @@ export class GameManager {
         const { activeColor, board } = this;
 
         if (!MakeMoveCommandValidator.validate(board, activeColor, command)) {
-          console.error(`Invalid move command sent by ${playerName}`);
+          this.logger.error(`Invalid move command sent by ${playerName}`);
           return;
         }
 
         const { from, to } = command;
         const startPiece = board[from];
 
-        console.log(
+        this.logger.info(
           `A valid move was made: ${from} -> ${to} by ${playerName} (${activeColor})`
         );
 
@@ -148,12 +148,15 @@ export class GameManager {
           [from]: null,
         };
         this.board = { ...board, ...boardUpdate };
-
-        if (isCheckmate(board, activeColor)) {
-          // this.io.to(gameId).emit(GameEndedEvent.name, new GameEndedEvent());
-        }
-
         this.activeColor = getOppositeColor(activeColor);
+
+        if (isCheckmate(this.board, this.activeColor)) {
+          const message = `${playerName} won the game! ${this.activeColor.toUpperCase()} is in checkmate.`;
+          this.logger.info(message);
+          this.io.to(gameId).emit(LOG_CREATED_EVENT, message);
+          this.io.to(gameId).emit(GAME_ENDED_EVENT, message);
+          return;
+        }
 
         this.io.to(gameId).emit(BOARD_UPDATED_EVENT, boardUpdate);
         this.io
