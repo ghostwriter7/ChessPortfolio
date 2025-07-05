@@ -30,29 +30,42 @@ export class SubscriberService {
   }
 
   public async tryInit(): Promise<void> {
-    let lastError: unknown;
-
-    for (let i = 0; i < 10; i++) {
-      try {
-        return this.consumer.connect();
-      } catch (e) {
-        this.logger.warn(`Failed to connect to broker, retrying in 3000ms`);
-        await new Promise((resolve) => setTimeout(resolve, 3000));
-        lastError = e;
-      }
-    }
-
-    throw lastError;
+    return this.runWithRetry(
+      () => this.consumer.connect(),
+      'Could not connect to broker, retrying in 3000ms'
+    );
   }
 
   public async subscribe(topic: EventName): Promise<void> {
-    return this.consumer.subscribe({ topic });
+    return this.runWithRetry(
+      () => this.consumer.subscribe({ topic }),
+      `Could not subscribe to topic ${topic}, retrying in 3000ms`
+    );
   }
 
   public async run(
     callback: (payload: EachMessagePayload) => Promise<void>
   ): Promise<void> {
     return this.consumer.run({ eachMessage: callback });
+  }
+
+  private async runWithRetry(
+    fn: () => Promise<void>,
+    warnLog: string
+  ): Promise<void> {
+    let lastError: unknown;
+
+    for (let i = 0; i < 10; i++) {
+      try {
+        return fn();
+      } catch (e) {
+        this.logger.warn(warnLog);
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        lastError = e;
+      }
+    }
+
+    throw lastError;
   }
 }
 
